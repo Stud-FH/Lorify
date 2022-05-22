@@ -1,121 +1,104 @@
 package fh.server.controller;
 
 import fh.server.entity.Account;
+import fh.server.entity.login.Login;
+import fh.server.entity.login.TokenLogin;
 import fh.server.rest.dto.AccountDTO;
+import fh.server.rest.dto.LoginBlueprint;
+import fh.server.rest.dto.LoginDTO;
 import fh.server.rest.mapper.DTOMapper;
 import fh.server.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 public class AccountController {
 
     private final AccountService accountService;
 
-    AccountController(AccountService accountService) {
+    AccountController(
+            AccountService accountService
+    ) {
         this.accountService = accountService;
     }
 
-    /**
-     * creates a new account, using the request's data as blueprint
-     * @param accountDTO blueprint
-     * @return newly created account data
-     */
-    @PostMapping("/account/create")
+    @PostMapping("/account")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public AccountDTO registerAccount(
-            @RequestBody AccountDTO accountDTO
+    public LoginDTO createAccount(
+            @RequestBody LoginBlueprint loginBlueprint
     ) {
-        Account blueprint = DTOMapper.INSTANCE.convertAccountDTOtoEntity(accountDTO);
-        Account created = accountService.createAccount(blueprint);
-        return DTOMapper.INSTANCE.convertEntityToAccountDTO(created);
+        TokenLogin tokenLogin = accountService.create(loginBlueprint);
+        return DTOMapper.INSTANCE.map(tokenLogin); // no pruning needed
     }
 
-    /**
-     * updates an account
-     * @param accountDTO blueprint
-     * @param id client id
-     * @param token authentication token
-     * @param remote if the account to update is different from own one (requires admin rights)
-     * @return updated account data
-     */
-    @PutMapping("/account/update")
+    @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AccountDTO updateAccount(
-            @RequestBody AccountDTO accountDTO,
-            @RequestHeader("id") Long id,
-            @RequestHeader("token") String token,
-            @RequestParam("remote") Optional<Long> remote
+    public AccountDTO login(
+            @RequestBody LoginBlueprint login
     ) {
-        Account blueprint = DTOMapper.INSTANCE.convertAccountDTOtoEntity(accountDTO);
-        accountService.authenticateAccount(id, token,
-                remote.isPresent()? Account.CLEARANCE_LEVEL_ADMIN : Account.CLEARANCE_LEVEL_CUSTOMER);
-        Account updated = accountService.updateAccount(remote.orElse(id), blueprint, remote.isPresent());
-        return DTOMapper.INSTANCE.convertEntityToAccountDTO(updated);
+        Account account = accountService.login(login);
+        return DTOMapper.INSTANCE.map(account); // no pruning needed
     }
 
-    /**
-     * deletes an account
-     * @param id client id
-     * @param token authentication token
-     * @param remote if the account to delete is different from own one (requires admin rights)
-     */
-    @DeleteMapping("/account/delete")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAccount(
-            @RequestHeader("id") Long id,
-            @RequestHeader("token") String token,
-            @RequestParam("remote") Optional<Long> remote
-    ) {
-        accountService.authenticateAccount(id, token,
-                remote.isPresent()? Account.CLEARANCE_LEVEL_ADMIN : Account.CLEARANCE_LEVEL_CUSTOMER);
-        accountService.deleteAccount(remote.orElse(id));
-    }
-
-    /**
-     * fetches account data
-     * @param id client id
-     * @param token authentication token
-     * @param remote if the account to fetch is different from own one (requires admin rights)
-     * @return found account data
-     */
-    @GetMapping("/account/get")
+    @GetMapping("/account")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public AccountDTO getAccount(
-            @RequestHeader("id") Long id,
-            @RequestHeader("token") String token,
-            @RequestParam("remote") Optional<Long> remote
+            @RequestHeader("Authorization") String token
     ) {
-        accountService.authenticateAccount(id, token,
-                remote.isPresent()? Account.CLEARANCE_LEVEL_ADMIN : Account.CLEARANCE_LEVEL_CUSTOMER);
-        Account account = accountService.fetchAccount(remote.orElse(id));
-        return DTOMapper.INSTANCE.convertEntityToAccountDTO(account);
+        Account principal = accountService.fetchByToken(token);
+        return DTOMapper.INSTANCE.map(principal);
     }
 
-    /**
-     * similar to getAccount(), except that this method uses the email address instead of the id for
-     * identification, and the password instead of the token for verification.
-     * can't be done remotely.
-     * also refreshes the account's verification token.
-     * @param email client email
-     * @param password client password
-     * @return account data
-     */
-    @GetMapping("/account/login")
+    @PostMapping("/account/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AccountDTO loginAccount(
-            @RequestHeader("email") String email,
-            @RequestHeader("password") String password
+    public LoginDTO addLogin(
+            @RequestHeader("Authorization") String token,
+            @RequestBody LoginBlueprint blueprint
     ) {
-        Account account = accountService.loginAccount(email, password);
-        return DTOMapper.INSTANCE.convertEntityToAccountDTO(account);
+        Account principal = accountService.fetchByToken(token);
+        Login login = accountService.addLogin(blueprint, principal);
+        return DTOMapper.INSTANCE.map(login); // no pruning needed
     }
+
+    @DeleteMapping("/account/login")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public AccountDTO removeLogin(
+            @RequestHeader("Authorization") String token,
+            @RequestBody String loginId
+    ) {
+        Account principal = accountService.fetchByToken(token);
+        principal = accountService.removeLogin(loginId, principal);
+        return DTOMapper.INSTANCE.map(principal); // no pruning needed
+    }
+
+//    @PostMapping("/account/attribute")
+//    @ResponseStatus(HttpStatus.OK)
+//    @ResponseBody
+//    public AccountDTO putAttribute(
+//            @RequestHeader("Authorization") String token,
+//            @RequestBody AttributeBlueprint blueprint
+//    ) {
+//        Account principal = accountService.fetchByToken(token);
+//        principal = accountService.putAttribute(blueprint, principal);
+//        return DTOMapper.INSTANCE.map(principal); // no pruning needed
+//    }
+//
+//    @DeleteMapping("/account/attribute")
+//    @ResponseStatus(HttpStatus.OK)
+//    @ResponseBody
+//    public AccountDTO removeAttribute(
+//            @RequestHeader("Authorization") String token,
+//            @RequestBody AttributeBlueprint blueprint
+//    ) {
+//        Account principal = accountService.fetchByToken(token);
+//        principal = accountService.removeAttribute(blueprint, principal);
+//        return DTOMapper.INSTANCE.map(principal); // no pruning needed
+//    }
 
 
 }

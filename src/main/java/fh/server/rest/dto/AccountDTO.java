@@ -1,75 +1,21 @@
 package fh.server.rest.dto;
 
-public class AccountDTO {
+import fh.server.entity.login.Login;
+import fh.server.rest.mapper.DTOMapper;
 
-    private Long id;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    private String email;
+public class AccountDTO extends EntityDTO {
 
-    private String password;
-
-    private String token;
-
-    private String address;
-
-    private String phoneNumber;
-
-    private Integer clearanceLevel;
+    private Set<LoginDTO> logins;
 
 
-    public Long getId() {
-        return id;
+    public Set<LoginDTO> getLogins() {
+        return logins;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Integer getClearanceLevel() {
-        return clearanceLevel;
-    }
-
-    public void setClearanceLevel(Integer clearanceLevel) {
-        this.clearanceLevel = clearanceLevel;
+    public void setLogins(Set<Login> logins) {
+        this.logins = logins.stream().map(DTOMapper.INSTANCE::map).collect(Collectors.toSet());
     }
 }

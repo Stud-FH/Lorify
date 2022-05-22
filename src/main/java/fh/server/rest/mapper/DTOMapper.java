@@ -1,23 +1,16 @@
 package fh.server.rest.mapper;
 
-import fh.server.constant.SpringContext;
-import fh.server.entity.Account;
-import fh.server.entity.Ingredient;
-import fh.server.entity.Order;
-import fh.server.entity.Pizza;
-import fh.server.repository.IngredientRepository;
-import fh.server.repository.PizzaRepository;
-import fh.server.rest.dto.AccountDTO;
-import fh.server.rest.dto.IngredientDTO;
-import fh.server.rest.dto.OrderDTO;
-import fh.server.rest.dto.PizzaDTO;
+import fh.server.entity.*;
+import fh.server.entity.login.*;
+import fh.server.entity.widget.*;
+import fh.server.rest.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Mapper
@@ -25,92 +18,90 @@ public interface DTOMapper {
 
     DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
-
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "email", target = "email")
-    @Mapping(source = "password", target = "password")
+    @Mapping(source = "attributes", target = "attributes")
+    @Mapping(source = "lastModified", target = "lastModified")
+    EntityDTO map(Entity source);
+
+    @Mapping(source = "logins", target = "logins")
+    AccountDTO map(Account source);
+
+    @Mapping(source = "identifier", target = "identifier")
+    PasswordLoginDTO map(PasswordLogin source);
+
     @Mapping(source = "token", target = "token")
-    @Mapping(source = "address", target = "address")
-    @Mapping(source = "phoneNumber", target = "phoneNumber")
-    @Mapping(source = "clearanceLevel", target = "clearanceLevel")
-    Account convertAccountDTOtoEntity(AccountDTO accountDTO);
+    TokenLoginDTO map(TokenLogin source);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "email", target = "email")
-    @Mapping(source = "password", target = "password")
-    @Mapping(source = "token", target = "token")
-    @Mapping(source = "address", target = "address")
-    @Mapping(source = "phoneNumber", target = "phoneNumber")
-    @Mapping(source = "clearanceLevel", target = "clearanceLevel")
-    AccountDTO convertEntityToAccountDTO(Account created);
+    @Mapping(source = "ownerIds", target = "ownerIds")
+    @Mapping(source = "comments", target = "comments")
+    @Mapping(source = "visibilityGuardDescription", target = "visibilityGuardDescription")
+    @Mapping(source = "tags", target = "tags")
+    ArtifactDTO map(Artifact source);
 
-    @Mapping(source = "id", target = "id")
+    @Mapping(source = "siteId", target = "siteId")
+    @Mapping(source = "accessor", target = "accessor")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "desc", target = "desc")
-    @Mapping(source = "available", target = "available")
-    Ingredient convertIngredientDTOtoEntity(IngredientDTO ingredientDTO);
+    AliasDTO map(Alias source);
 
-    @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "desc", target = "desc")
-    @Mapping(source = "available", target = "available")
-    IngredientDTO convertEntityToIngredientDTO(Ingredient ingredient);
+    @Mapping(source = "creatorGuardDescription", target = "creatorGuardDescription")
+    @Mapping(source = "aliases", target = "aliases")
+    @Mapping(source = "pages", target = "pages")
+    @Mapping(source = "visibility", target = "visibility")
+    @Mapping(source = "nameManagementPolicy", target = "nameManagementPolicy")
+    @Mapping(source = "tagManagementPolicy", target = "tagManagementPolicy")
+    @Mapping(source = "attributeManagementPolicy", target = "attributeManagementPolicy")
+    SiteDTO map(Site source);
 
-    @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "desc", target = "desc")
-    @Mapping(expression = "java(convertIngredientIdList(pizzaDTO.getIngredientIds()))", target = "ingredients")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "available", target = "available")
-    Pizza convertPizzaDTOtoEntity(PizzaDTO pizzaDTO);
+    @Mapping(source = "siteId", target = "siteId")
+    @Mapping(source = "creatorGuardDescription", target = "creatorGuardDescription")
+    @Mapping(source = "widgets", target = "widgets")
+    PageDTO map(Page source);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "desc", target = "desc")
-    @Mapping(expression = "java(convertIngredientList(pizza.getIngredients()))", target = "ingredientIds")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "available", target = "available")
-    PizzaDTO convertEntityToPizzaDTO(Pizza pizza);
+    @Mapping(source = "components", target = "components")
+    WidgetDTO map(Widget source);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "customerId", target = "customerId")
-    @Mapping(source = "address", target = "address")
-    @Mapping(source = "phoneNumber", target = "phoneNumber")
-    @Mapping(expression = "java(convertPizzaIdList(orderDTO.getPizzaIds()))", target = "pizzas")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "comment", target = "comment")
-    Order convertOrderDTOtoEntity(OrderDTO orderDTO);
+    @Mapping(source = "componentType", target = "componentType")
+    WidgetComponentDTO map(WidgetComponent source);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "customerId", target = "customerId")
-    @Mapping(source = "address", target = "address")
-    @Mapping(source = "phoneNumber", target = "phoneNumber")
-    @Mapping(expression = "java(convertPizzaList(order.getPizzas()))", target = "pizzaIds")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "comment", target = "comment")
-    OrderDTO convertEntityToOrderDTO(Order order);
+    @Mapping(source = "filename", target = "filename")
+    @Mapping(source = "data", target = "data")
+    FileDTO map(File source);
 
-    default List<Ingredient> convertIngredientIdList(Collection<Long> ids) {
-        if (ids == null) return null;
-        IngredientRepository ingredientRepository = SpringContext.getBean(IngredientRepository.class);
-        return ids.stream().map(ingredientRepository::getById).collect(Collectors.toList());
-    }
+    @Mapping(source = "text", target = "text")
+    ParagraphDTO map(Paragraph source);
 
-    default List<Long> convertIngredientList(Collection<Ingredient> ingredients) {
-        if (ingredients == null) return null;
-        return ingredients.stream().map(Ingredient::getId).collect(Collectors.toList());
-    }
+    @Mapping(source = "formulation", target = "formulation")
+    @Mapping(source = "submissionGuardDescription", target = "submissionGuardDescription")
+    @Mapping(source = "inspectorGuardDescription", target = "inspectorGuardDescription")
+    @Mapping(source = "submissions", target = "submissions")
+    @Mapping(source = "quantification", target = "quantification")
+    PollDTO map(Poll source);
 
-    default List<Pizza> convertPizzaIdList(Collection<Long> ids) {
-        if (ids == null) return null;
-        PizzaRepository pizzaRepository = SpringContext.getBean(PizzaRepository.class);
-        return ids.stream().map(pizzaRepository::getById).collect(Collectors.toList());
-    }
 
-    default List<Long> convertPizzaList(Collection<Pizza> pizzas) {
-        if (pizzas == null) return null;
-        return pizzas.stream().map(Pizza::getId).collect(Collectors.toList());
+
+
+
+    @Mapping(source = "accountId", target = "accountId")
+    default LoginDTO map(Login source) {
+        switch (source.getLoginMethod()) {
+            case Token: return new TokenLoginDTO() {{
+                setId(source.getId());
+                setAttributes(source.getAttributes());
+                setLastModified(source.getLastModified());
+                setAccountId(source.getAccountId());
+                setToken(((TokenLogin) source).getToken());
+            }};
+            case Password: return new PasswordLoginDTO() {{
+                setId(source.getId());
+                setAttributes(source.getAttributes());
+                setLastModified(source.getLastModified());
+                setAccountId(source.getAccountId());
+                setIdentifier(((PasswordLogin) source).getIdentifier());
+            }};
+            case OAuth2: //TODO
+            default: throw new IllegalStateException();
+        }
     }
 }

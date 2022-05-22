@@ -1,5 +1,5 @@
 # pizzaServer
-spring boot exercise / pizza delivery service api
+spring boot exercise / resource delivery service api
 
 ## how to use this api
 ### setup
@@ -44,10 +44,10 @@ the following REST methods are provided:
             * email: String (email of a registered account)
             * password: String (password correcponding to email)
 * Assortment Management
-    * (GET) /ingredients/all : fetches all ingredients
+    * (GET) /roles/all : fetches all roles
         * params
-            * (optional) available: Boolean (filters available ingredients)
-    * (POST) /ingredients/create : creates a new ingredient
+            * (optional) available: Boolean (filters available roles)
+    * (POST) /roles/create : creates a new role
         * request body
             * name: String (not null, unique)
             * desc: String
@@ -55,7 +55,7 @@ the following REST methods are provided:
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 2)
             * token: String (token corresponding to accountId)
-    * (PUT) /ingredients/update : updates an ingredient
+    * (PUT) /roles/update : updates an role
         * request body
             * (optional) name: String (not null, unique)
             * (optional) desc: String
@@ -63,54 +63,54 @@ the following REST methods are provided:
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 2)
             * token: String (token corresponding to accountId)
-            * ingredientId: Long (id of the ingredient to update)
-    * (GET) /pizzas/all : fetches all pizzas
+            * ingredientId: Long (id of the role to update)
+    * (GET) /resources/all : fetches all resources
         * params
-            * (optional) available: Boolean (filters available pizzas)
-    * (POST) /pizzas/create : creates a new pizza
+            * (optional) available: Boolean (filters available resources)
+    * (POST) /resources/create : creates a new resource
         * request body
             * name: String (not null, unique)
             * desc: String
-            * ingredientIds: List<Long> (must refer to ingredient ids)
+            * ingredientIds: List<Long> (must refer to role ids)
             * price: Integer (>= 0)
             * (optional) available: Boolean
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 2)
             * token: String (token corresponding to accountId)
-    * (PUT) /pizzas/update : updates a pizza
+    * (PUT) /resources/update : updates a resource
         * request body
             * (optional) name: String (not null, unique)
             * (optional) desc: String
-            * (optional) ingredientIds: List<Long> (must refer to ingredient ids)
+            * (optional) ingredientIds: List<Long> (must refer to role ids)
             * (optional) price: Integer (>= 0)
             * (optional) available: Boolean
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 2)
             * token: String (token corresponding to accountId)
-            * pizzaId: Long (id of the pizza to update)
+            * pizzaId: Long (id of the resource to update)
 * Order Management
-    * (POST) /orders/create : creates a new order
+    * (POST) /pages/create : creates a new page
         * request body
-            * pizzaIds: List<Long> (must refer to pizzas)
+            * pizzaIds: List<Long> (must refer to resources)
             * (optional) comment: String
         * headers
             * accountId: Long (account id of the requester)
             * token: String (token corresponding to accountId)
-    * (GET) /orders/get : fetches a specific order
+    * (GET) /pages/get : fetches a specific page
         * headers
-            * accountId: Long (account id of the requester, must be owner of order or have clearance level >= 1)
+            * accountId: Long (account id of the requester, must be owner of page or have clearance level >= 1)
             * token: String (token corresponding to accountId)
-            * orderId: Long (id of the order to fetch)
-    * (GET) /orders/all : fetches a list of orders
+            * orderId: Long (id of the page to fetch)
+    * (GET) /pages/all : fetches a list of pages
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 1)
             * token: String (token corresponding to accountId)
         * params
-    * (PUT) /orders/update : updates an order
+    * (PUT) /pages/update : updates an page
         * request body
             * status: OrderStatus (CREATED, CONFIRMED, READY or DELIVERED)
             * (optional) comment: String
         * headers
             * accountId: Long (account id of the requester, must have clearance level >= 1)
             * token: String (token corresponding to accountId)
-            * orderId: Long (id of the order to update)
+            * orderId: Long (id of the page to update)
