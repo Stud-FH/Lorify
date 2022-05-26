@@ -10,14 +10,14 @@ public class Tokenizer {
 
     public String until(String expression) {
         int index = string.indexOf(expression);
-        if (index < 0) throw new IllegalArgumentException(); // todo dedicated exception
+        if (index < 0) throw new SyntaxError();
         String result = string.substring(0, index);
         string = string.substring(index + expression.length());
         return result;
     }
 
     public void forceConsume(String prefix) {
-        if (!string.startsWith(prefix)) throw new IllegalArgumentException(); // todo dedicated exception
+        if (!string.startsWith(prefix)) throw new SyntaxError();
         string = string.substring(prefix.length());
     }
 
@@ -27,7 +27,7 @@ public class Tokenizer {
                 string = string.substring(prefix.length());
             }
         }
-        throw new IllegalArgumentException(); // todo dedicated exception
+        throw new SyntaxError();
     }
 
     public boolean tryConsume(String prefix) {

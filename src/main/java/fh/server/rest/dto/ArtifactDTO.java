@@ -1,11 +1,6 @@
 package fh.server.rest.dto;
 
-import fh.server.entity.Account;
-import fh.server.rest.mapper.DTOMapper;
-
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ArtifactDTO extends EntityDTO {
 
@@ -13,7 +8,7 @@ public class ArtifactDTO extends EntityDTO {
 
     private String comments;
 
-    private String visibilityGuardDescription;
+    private String visibilityGuard;
 
     private Set<String> tags;
 
@@ -34,12 +29,12 @@ public class ArtifactDTO extends EntityDTO {
         this.comments = comments;
     }
 
-    public String getVisibilityGuardDescription() {
-        return visibilityGuardDescription;
+    public String getVisibilityGuard() {
+        return visibilityGuard;
     }
 
-    public void setVisibilityGuardDescription(String visibilityGuardDescription) {
-        this.visibilityGuardDescription = visibilityGuardDescription;
+    public void setVisibilityGuard(String visibilityGuard) {
+        this.visibilityGuard = visibilityGuard;
     }
 
     public Set<String> getTags() {

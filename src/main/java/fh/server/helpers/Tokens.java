@@ -1,6 +1,7 @@
 package fh.server.helpers;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class Tokens {
 
@@ -18,5 +19,13 @@ public class Tokens {
             token.append(charPool[r.nextInt(charPool.length)]);
         }
         return token.toString();
+    }
+
+    public static String randomAliasToken() {
+        return 'a' + random(3)+"-"+random(4);
+    }
+
+    public static String randomAccountToken() {
+        return 'A' + UUID.randomUUID().toString().substring(1);
     }
 }

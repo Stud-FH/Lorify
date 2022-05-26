@@ -1,7 +1,6 @@
 package fh.server.helpers.interpreter;
 
 import fh.server.entity.widget.Poll;
-import fh.server.helpers.Context;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 
 @FunctionalInterface
 public interface B extends Generic<Boolean> {
-    
-    Boolean resolve(Context context);
 
     static B convert(S arg0) {
         return context -> Boolean.parseBoolean(arg0.resolve(context));
@@ -76,31 +73,31 @@ public interface B extends Generic<Boolean> {
         return context -> arg0.resolve(context).distinct().count() <= 1;
     }
 
-    static B artifactTag(S arg0) {
-        return context -> context.getArtifact().hasTag(arg0.resolve(context));
+    static B victimTag(S arg0) {
+        return context -> context.getVictim().hasTag(arg0.resolve(context));
     }
 
-    static B aliasTag(S arg0) {
-        return context -> context.getArtifact().hasTag(arg0.resolve(context));
+    static B principalTag(S arg0) {
+        return context -> context.getPrincipal().hasTag(arg0.resolve(context));
     }
 
     static B pollHasQuantification(S arg0) {
-        return context -> context.getPoll().hasQuantification(arg0.resolve(context));
+        return context -> context.victimAsPoll().hasQuantification(arg0.resolve(context));
     }
 
     static B pollOption() {
-        return context -> context.getPoll().hasQuantification(context.getInput());
+        return context -> context.victimAsPoll().hasQuantification(context.getValue());
     }
 
     static B pollOptionMc() {
-        return context -> Arrays.stream(context.getInput().split(Poll.MC_SEPARATOR)).allMatch(context.getPoll()::hasQuantification);
+        return context -> Arrays.stream(context.getValue().split(Poll.MC_SEPARATOR)).allMatch(context.victimAsPoll()::hasQuantification);
     }
 
     static B pollLimit() {
         return context -> {
-            Poll poll = context.getPoll();
+            Poll poll = context.victimAsPoll();
             int load = poll.getSubmissions().values().stream().mapToInt(poll::getQuantification).sum();
-            int additional = context.getPoll().getQuantification(context.getInput());
+            int additional = context.victimAsPoll().getQuantification(context.getValue());
             int limit = poll.getQuantification(Poll.KEY_LIMIT);
             return load + additional <= limit;
         };
@@ -108,24 +105,20 @@ public interface B extends Generic<Boolean> {
 
     static B pollLimitMc() {
         return context -> {
-            Poll poll = context.getPoll();
+            Poll poll = context.victimAsPoll();
             int load = poll.getSubmissions().values().stream().mapToInt(s -> Arrays.stream(s.split(Poll.MC_SEPARATOR)).mapToInt(poll::getQuantification).sum()).sum();
-            int additional = Arrays.stream(context.getInput().split(Poll.MC_SEPARATOR)).mapToInt(poll::getQuantification).sum();
+            int additional = Arrays.stream(context.getValue().split(Poll.MC_SEPARATOR)).mapToInt(poll::getQuantification).sum();
             int limit = poll.getQuantification(Poll.KEY_LIMIT);
             return load + additional <= limit;
         };
     }
 
-    static B artifactHasAttrib(S arg0) {
-        return context -> context.getArtifact().hasAttribute(arg0.resolve(context));
+    static B victimHasAttribute(S arg0) {
+        return context -> context.getVictim().hasAttribute(arg0.resolve(context));
     }
 
-    static B principalHasAttrib(S arg0) {
+    static B principalHasAttribute(S arg0) {
         return context -> context.getPrincipal().hasAttribute(arg0.resolve(context));
-    }
-
-    static B aliasHasAttrib(S arg0) {
-        return context -> context.getAlias().hasAttribute(arg0.resolve(context));
     }
 
     static <T> B listDistinct(GenericStream<T> arg0) {
@@ -185,7 +178,16 @@ public interface B extends Generic<Boolean> {
         };
     }
 
-    static B tautology() {
+    static B negative() {
+        return context -> false;
+    }
+
+    static B positive() {
         return context -> true;
     }
+
+    static B ownership() {
+        return context -> context.getVictim().getOwnerId().equals(context.getPrincipal().getId());
+    }
 }
+

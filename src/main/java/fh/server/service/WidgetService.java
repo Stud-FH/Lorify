@@ -3,11 +3,12 @@ package fh.server.service;
 import fh.server.entity.*;
 import fh.server.entity.widget.*;
 import fh.server.helpers.Context;
+import fh.server.helpers.Operation;
 import fh.server.repository.*;
-import fh.server.rest.dto.EntityBlueprint;
-import fh.server.rest.dto.PageBlueprint;
-import fh.server.rest.dto.WidgetBlueprint;
-import fh.server.rest.dto.WidgetComponentBlueprint;
+import fh.server.rest.dao.EntityDAO;
+import fh.server.rest.dao.SiteDAO;
+import fh.server.rest.dao.WidgetDAO;
+import fh.server.rest.dao.WidgetComponentDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,11 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
-public class WidgetService extends ArtifactService {
+public class WidgetService extends EntityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WidgetService.class);
 
@@ -34,7 +32,6 @@ public class WidgetService extends ArtifactService {
 
     public WidgetService(
             @Qualifier("entityRepository") EntityRepository entityRepository,
-            @Qualifier("artifactRepository") ArtifactRepository artifactRepository,
             @Qualifier("widgetRepository") WidgetRepository widgetRepository,
             @Qualifier("postElementRepository") WidgetComponentRepository widgetComponentRepository,
             @Qualifier("paragraphRepository") ParagraphRepository paragraphRepository,
@@ -42,7 +39,7 @@ public class WidgetService extends ArtifactService {
             @Qualifier("pollRepository") PollRepository pollRepository,
             @Qualifier("pageRepository") PageRepository pageRepository
     ) {
-        super(entityRepository, artifactRepository);
+        super(entityRepository);
         this.widgetRepository = widgetRepository;
         this.widgetComponentRepository = widgetComponentRepository;
         this.paragraphRepository = paragraphRepository;
@@ -54,31 +51,28 @@ public class WidgetService extends ArtifactService {
 
 
 
-    public Widget fetchWidget(String id) {
+    public Widget fetchWidgetById(String id) {
         return widgetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "widget not found"));
     }
 
-    /**
-     * @return  widget, principal, artifact
-     */
-    public Context buildContext(Widget widget, Account principal) {
-        return Context.build()
-                .principal(principal)
-                .artifact(widget)
-                .widget(widget)
-                .dispatch();
+    public WidgetComponent fetchComponentById(String id) {
+        return widgetComponentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "component not found"));
     }
 
-    public Widget createWidget(WidgetBlueprint blueprint, Account principal) {
-        Context context = buildContext(principal);
-        checkNotEmpty(blueprint.getComponentKeys(), "componentKeys");
-        checkNotNull(blueprint.getComponents());
-        for (String key : blueprint.getComponentKeys()) checkNotNull(blueprint.getComponents().get(key));
+    public Widget createWidget(WidgetDAO dao, Account principal) {
 
         Widget widget = new Widget();
-        widget.addOwner(principal);
-        for (String key : blueprint.getComponentKeys()) widget.putComponent(key, produce(blueprint.getComponents().get(key)));
+        widget.adapt(dao);
+        widget.setName(dao.getName());
+        widget.setOwner(principal);
+        for (String key : dao.getComponentKeys()) widget.putComponent(key, produce(dao.getComponents().get(key)));
+
+        Context context = new Context(principal, null);
+        checkNotEmpty(dao.getComponentKeys(), "componentKeys");
+        checkNotNull(dao.getComponents());
+        for (String key : dao.getComponentKeys()) checkNotNull(dao.getComponents().get(key));
 
         widget.getComponents().values().forEach(this::saveAndFlush);
         widget = saveAndFlush(widget);
@@ -86,103 +80,73 @@ public class WidgetService extends ArtifactService {
         return widget;
     }
 
-    protected WidgetComponent produce(WidgetComponentBlueprint blueprint) {
-        switch (blueprint.getComponentType()) {
+    protected WidgetComponent produce(WidgetComponentDAO dao) {
+        switch (dao.getComponentType()) {
             case File: return new File() {{
-                setFilename(blueprint.getFilename());
-                setData(blueprint.getData());
-                setComments(blueprint.getComments());
-                setVisibilityGuardDescription(blueprint.getVisibilityGuardDescription());
-                addTags(blueprint.getTags());
-                putAttributes(blueprint.getAttributes());
+                adapt(dao);
+                setFilename(dao.getFilename());
+                setData(dao.getData());
             }};
             case Paragraph: return new Paragraph() {{
-                setText(blueprint.getText());
-                setComments(blueprint.getComments());
-                setVisibilityGuardDescription(blueprint.getVisibilityGuardDescription());
-                addTags(blueprint.getTags());
-                putAttributes(blueprint.getAttributes());
+                adapt(dao);
+                setText(dao.getText());
             }};
             case Poll: return new Poll() {{
-                setFormulation(blueprint.getFormulation());
-                setSubmissionGuardDescription(blueprint.getSubmissionGuardDescription());
-                setInspectorGuardDescription(blueprint.getInspectorGuardDescription());
-                putQuantification(blueprint.getQuantification());
-                setComments(blueprint.getComments());
-                setVisibilityGuardDescription(blueprint.getVisibilityGuardDescription());
-                addTags(blueprint.getTags());
-                putAttributes(blueprint.getAttributes());
+                adapt(dao);
+                setFormulation(dao.getFormulation());
+                putQuantification(dao.getQuantification());
             }};
             default: throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "unexpected component type");
         }
     }
 
-    protected void verifyUpdate(EntityBlueprint blueprint, Context context, EntityService service) {
-        super.verifyUpdate(blueprint, context, service);
-
-        if (blueprint.getChangelist().contains("name")) {
-            ((WidgetService) service).verifyNameUpdate(((WidgetBlueprint) blueprint), context);
+    public void putWidget(Widget widget, String pageId, String position, Entity principal) {
+        //TODO verify, make method more elegant
+        Page page = pageRepository.findById(pageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "page not found"));
+        if (position == null) {
+            int index = 0;
+            while (page.hasWidget((position = ""+index))) index++;
         }
-        if (blueprint.getChangelist().contains("component")) {
-            ((WidgetService) service).verifyComponentUpdate(((WidgetBlueprint) blueprint), context);
-        }
-    }
-
-    protected void performUpdate(EntityBlueprint blueprint, Context context, EntityService service) { //todo update individual components as well
-        super.performUpdate(blueprint, context, service);
-
-        if (blueprint.getChangelist().contains("name")) {
-            ((WidgetService) service).performNameUpdate(((WidgetBlueprint) blueprint), context);
-        }
-        if (blueprint.getChangelist().contains("component")) {
-            ((WidgetService) service).performComponentUpdate(((WidgetBlueprint) blueprint), context);
-        }
-    }
-
-    public void verifyNameUpdate(WidgetBlueprint blueprint, Context context) {
-        checkNotNull(context.getWidget());
-        checkOwner(context);
-        checkNotEmpty(blueprint.getName(), "name");
-    }
-
-    public void performNameUpdate(WidgetBlueprint blueprint, Context context) {
-        String previous = context.getWidget().getName();
-        context.getWidget().setName(blueprint.getName());
+        page.putWidget(position, widget);
         pageRepository.flush();
-        LOGGER.info(String.format("name updated: %s -> %s in %s", previous, blueprint.getName(), context));
     }
 
-    protected void verifyComponentUpdate(WidgetBlueprint blueprint, Context context) {
-        checkNotNull(context.getWidget());
-        checkOwner(context);
-        checkNotNull(blueprint.getComponentKeys());
-        checkNotNull(blueprint.getComponentIds());
-        for (String key : blueprint.getComponentKeys()) {
-            checkComponentExistence(blueprint.getComponentIds().get(key));
+    public Widget operate(Widget widget, WidgetDAO dao, Entity principal) {
+        super.operate(dao, new Context(principal, widget), this);
+        return widget;
+    }
+
+    protected Operation setup(String opKey, EntityDAO dao, Context context) {
+        WidgetDAO widgetDao = (WidgetDAO) dao;
+
+        if ("name".equals(opKey)) {
+            checkNotEmpty(widgetDao.getName(), "name");
+            return context.operation(opKey, widgetDao.getName(), context.victimAsSite().getName());
         }
-    }
 
-    protected void performComponentUpdate(WidgetBlueprint blueprint, Context context) {
-        StringBuilder update = new StringBuilder();
-        for (String key : blueprint.getComponentKeys()) {
-            if (key == null ||key.isEmpty()) {
-                WidgetComponent previous = context.getWidget().removeComponent(key);
-                update.append(String.format("%s\"%s\" removed (prev:\"%s\")", update.length() == 0 ? "{" : ", ", key, previous));
-            } else {
-                WidgetComponent value = widgetComponentRepository.findById(blueprint.getComponentIds().get(key)).orElse(null);
-                WidgetComponent previous = context.getWidget().putComponent(key, value);
-                update.append(String.format("%s\"%s\" -> \"%s\" (prev:\"%s\")", update.length() == 0 ? "{" : ", ", key, value, previous));
-            }
+        if (opKey.startsWith("Widget.c:")) {
+            String key = opKey.substring( "Widget.c:".length());
+            String componentId = widgetDao.getComponentIds().get(key);
+            return context.operation(opKey, fetchComponentById(componentId), context.victimAsSite().getPage(key));
         }
-        update.append("}");
-        widgetRepository.flush();
-        LOGGER.info(String.format("components updated: %s in %s", update, context));
+        return super.setup(opKey, dao, context);
     }
 
-    private void checkComponentExistence(String id) {
-        if (id == null || id.isEmpty()) return;
-        if (!widgetComponentRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "component not found: "+id);
+    protected void execute(Operation operation, EntityDAO dao) {
+        WidgetDAO widgetDao = (WidgetDAO) dao;
+        String opKey = operation.getOperation();
+
+        switch (opKey) {
+            case "get": return;
+            case "name": operation.victimAsWidget().setName(widgetDao.getName()); return;
+        }
+        if (opKey.startsWith("Widget.c:")) {
+            String key = opKey.substring( "Widget.c:".length());
+            operation.valueAsWidget().putComponent(key, operation.valueAsComponent());
+            return;
+        }
+        super.execute(operation, dao);
     }
 
     protected WidgetComponent saveAndFlush(WidgetComponent created) {

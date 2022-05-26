@@ -1,8 +1,8 @@
-package fh.server.rest.dto;
+package fh.server.rest.dao;
 
 import fh.server.constant.LoginMethod;
 
-public class LoginBlueprint extends EntityBlueprint {
+public class LoginDAO extends EntityDAO {
 
     private LoginMethod loginMethod;
 

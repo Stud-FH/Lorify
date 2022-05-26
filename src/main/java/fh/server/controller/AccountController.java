@@ -1,11 +1,8 @@
 package fh.server.controller;
 
 import fh.server.entity.Account;
-import fh.server.entity.login.Login;
-import fh.server.entity.login.TokenLogin;
 import fh.server.rest.dto.AccountDTO;
-import fh.server.rest.dto.LoginBlueprint;
-import fh.server.rest.dto.LoginDTO;
+import fh.server.rest.dao.LoginDAO;
 import fh.server.rest.mapper.DTOMapper;
 import fh.server.service.AccountService;
 import org.springframework.http.HttpStatus;
@@ -22,24 +19,33 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @GetMapping("/check-login/{identifier}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Boolean checkLogin(
+            @PathVariable("identifier") String identifier
+    ) {
+        return accountService.existsByIdentifier(identifier);
+    }
+
     @PostMapping("/account")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public LoginDTO createAccount(
-            @RequestBody LoginBlueprint loginBlueprint
+    public AccountDTO createAccount(
+            @RequestBody LoginDAO loginBlueprint
     ) {
-        TokenLogin tokenLogin = accountService.create(loginBlueprint);
-        return DTOMapper.INSTANCE.map(tokenLogin); // no pruning needed
+        Account account = accountService.create(loginBlueprint);
+        return DTOMapper.INSTANCE.map(account); // no pruning needed; client is owner
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public AccountDTO login(
-            @RequestBody LoginBlueprint login
-    ) {
+            @RequestBody LoginDAO login
+    ) throws InterruptedException {
         Account account = accountService.login(login);
-        return DTOMapper.INSTANCE.map(account); // no pruning needed
+        return DTOMapper.INSTANCE.map(account); // no pruning needed; client is owner
     }
 
     @GetMapping("/account")
@@ -49,19 +55,19 @@ public class AccountController {
             @RequestHeader("Authorization") String token
     ) {
         Account principal = accountService.fetchByToken(token);
-        return DTOMapper.INSTANCE.map(principal);
+        return DTOMapper.INSTANCE.map(principal); // no pruning needed; client is owner
     }
 
     @PostMapping("/account/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LoginDTO addLogin(
+    public AccountDTO addLogin(
             @RequestHeader("Authorization") String token,
-            @RequestBody LoginBlueprint blueprint
+            @RequestBody LoginDAO blueprint
     ) {
         Account principal = accountService.fetchByToken(token);
-        Login login = accountService.addLogin(blueprint, principal);
-        return DTOMapper.INSTANCE.map(login); // no pruning needed
+        principal = accountService.addLogin(blueprint, principal);
+        return DTOMapper.INSTANCE.map(principal); // no pruning needed; client is owner
     }
 
     @DeleteMapping("/account/login")
@@ -73,32 +79,7 @@ public class AccountController {
     ) {
         Account principal = accountService.fetchByToken(token);
         principal = accountService.removeLogin(loginId, principal);
-        return DTOMapper.INSTANCE.map(principal); // no pruning needed
+        return DTOMapper.INSTANCE.map(principal); // no pruning needed; client is owner
     }
-
-//    @PostMapping("/account/attribute")
-//    @ResponseStatus(HttpStatus.OK)
-//    @ResponseBody
-//    public AccountDTO putAttribute(
-//            @RequestHeader("Authorization") String token,
-//            @RequestBody AttributeBlueprint blueprint
-//    ) {
-//        Account principal = accountService.fetchByToken(token);
-//        principal = accountService.putAttribute(blueprint, principal);
-//        return DTOMapper.INSTANCE.map(principal); // no pruning needed
-//    }
-//
-//    @DeleteMapping("/account/attribute")
-//    @ResponseStatus(HttpStatus.OK)
-//    @ResponseBody
-//    public AccountDTO removeAttribute(
-//            @RequestHeader("Authorization") String token,
-//            @RequestBody AttributeBlueprint blueprint
-//    ) {
-//        Account principal = accountService.fetchByToken(token);
-//        principal = accountService.removeAttribute(blueprint, principal);
-//        return DTOMapper.INSTANCE.map(principal); // no pruning needed
-//    }
-
 
 }

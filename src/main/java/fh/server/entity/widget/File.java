@@ -1,6 +1,7 @@
 package fh.server.entity.widget;
 
 import fh.server.constant.ComponentType;
+import fh.server.constant.EntityType;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -35,5 +36,10 @@ public class File extends WidgetComponent {
     @Override
     public ComponentType getComponentType() {
         return ComponentType.File;
+    }
+
+    @Override
+    public EntityType getType() {
+        return EntityType.File;
     }
 }

@@ -1,11 +1,7 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
-
 @FunctionalInterface
 public interface L extends Generic<Long> {
-    
-    Long resolve(Context context);
 
     static L convert(B arg0) {
         return context -> arg0.resolve(context) ? 1L : 0L;

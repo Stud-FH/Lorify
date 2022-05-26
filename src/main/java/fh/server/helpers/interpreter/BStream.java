@@ -1,13 +1,7 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
-
-import java.util.stream.Stream;
-
 @FunctionalInterface
 public interface BStream extends GenericStream<Boolean> {
-    
-    Stream<Boolean> resolve(Context context);
 
     static BStream convert(SStream arg0) {
         return context -> arg0.resolve(context).map(Boolean::parseBoolean);

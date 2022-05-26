@@ -1,11 +1,7 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
-
 @FunctionalInterface
 public interface D extends Generic<Double> {
-    
-    Double resolve(Context context);
 
     static D convert(S arg0) {
         return context -> Double.parseDouble(arg0.resolve(context));

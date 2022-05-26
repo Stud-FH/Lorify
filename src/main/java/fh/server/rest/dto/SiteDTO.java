@@ -1,33 +1,23 @@
 package fh.server.rest.dto;
 
-import fh.server.constant.AliasManagementPolicy;
 import fh.server.constant.SiteVisibility;
+import fh.server.constant.TrustLevel;
 import fh.server.entity.Alias;
 import fh.server.entity.Page;
 import fh.server.rest.mapper.DTOMapper;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class SiteDTO extends ArtifactDTO {
+public class SiteDTO extends EntityDTO {
 
     private String name;
 
-    private String creatorGuardDescription;
+    private SiteVisibility visibility;
 
     private Map<String, AliasDTO> aliases;
 
     private Map<String, PageDTO> pages;
-
-    private SiteVisibility visibility;
-
-    private AliasManagementPolicy nameManagementPolicy;
-
-    private AliasManagementPolicy tagManagementPolicy;
-
-    private AliasManagementPolicy attributeManagementPolicy;
 
 
 
@@ -40,12 +30,12 @@ public class SiteDTO extends ArtifactDTO {
         this.name = name;
     }
 
-    public String getCreatorGuardDescription() {
-        return creatorGuardDescription;
+    public SiteVisibility getVisibility() {
+        return visibility;
     }
 
-    public void setCreatorGuardDescription(String creatorGuardDescription) {
-        this.creatorGuardDescription = creatorGuardDescription;
+    public void setVisibility(SiteVisibility visibility) {
+        this.visibility = visibility;
     }
 
     public Map<String, AliasDTO> getAliases() {
@@ -66,35 +56,15 @@ public class SiteDTO extends ArtifactDTO {
         pages.keySet().forEach(k -> this.pages.put(k, DTOMapper.INSTANCE.map(pages.get(k))));
     }
 
-    public SiteVisibility getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(SiteVisibility visibility) {
-        this.visibility = visibility;
-    }
-
-    public AliasManagementPolicy getNameManagementPolicy() {
-        return nameManagementPolicy;
-    }
-
-    public void setNameManagementPolicy(AliasManagementPolicy nameManagementPolicy) {
-        this.nameManagementPolicy = nameManagementPolicy;
-    }
-
-    public AliasManagementPolicy getTagManagementPolicy() {
-        return tagManagementPolicy;
-    }
-
-    public void setTagManagementPolicy(AliasManagementPolicy tagManagementPolicy) {
-        this.tagManagementPolicy = tagManagementPolicy;
-    }
-
-    public AliasManagementPolicy getAttributeManagementPolicy() {
-        return attributeManagementPolicy;
-    }
-
-    public void setAttributeManagementPolicy(AliasManagementPolicy attributeManagementPolicy) {
-        this.attributeManagementPolicy = attributeManagementPolicy;
+    @Override
+    public SiteDTO prune(TrustLevel principalClearance) {
+        if (!principalClearance.meets(accessRequirements.get("get-name"))) name = null;
+        if (!principalClearance.meets(accessRequirements.get("get-visibility"))) visibility = null;
+        if (!principalClearance.meets(accessRequirements.get("get-aliases"))) aliases = null;
+//        else for(String k : aliases.keySet()) if (!principalClearance.meets(accessRequirements.get("get-alias:"+k))) aliases.remove(k); // not desirable
+        if (!principalClearance.meets(accessRequirements.get("get-pages"))) pages = null;
+        else for(String k : pages.keySet()) if (!principalClearance.meets(accessRequirements.get("get-p:"+k))) pages.remove(k);
+        super.prune(principalClearance);
+        return this;
     }
 }

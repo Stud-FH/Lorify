@@ -1,26 +1,18 @@
 package fh.server.entity;
 
+import fh.server.constant.EntityType;
+import fh.server.constant.SpringContext;
 import fh.server.entity.widget.Widget;
-import fh.server.helpers.interpreter.B;
-import fh.server.helpers.interpreter.DescriptionInterpreter;
+import fh.server.repository.SiteRepository;
 
 import javax.persistence.*;
 import java.util.*;
 
 @javax.persistence.Entity
-public class Page extends Artifact {
+public class Page extends Entity {
 
     @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private String siteId;
-
-    @Column(length = 2000)
-    private String creatorGuardDescription;
-
-    @Transient
-    private transient B creatorGuard;
 
     @ManyToMany
     private final Map<String, Widget> widgets = new HashMap<>(); // key ~ position
@@ -35,31 +27,6 @@ public class Page extends Artifact {
     public void setName(String name) {
         this.name = name;
         setLastModified(System.currentTimeMillis());
-    }
-
-    public String getSiteId() {
-        return siteId;
-    }
-
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public String getCreatorGuardDescription() {
-        return creatorGuardDescription;
-    }
-
-    public void setCreatorGuardDescription(String s) {
-        this.creatorGuardDescription = s;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public B getCreatorGuard() {
-        if (creatorGuard == null) {
-            creatorGuard = DescriptionInterpreter.resilientB(creatorGuardDescription);
-        }
-        return creatorGuard;
     }
 
     public Map<String, Widget> getWidgets() {
@@ -97,5 +64,14 @@ public class Page extends Artifact {
         if (widgets == null) return;
         this.widgets.putAll(widgets);
         setLastModified(System.currentTimeMillis());
+    }
+
+    protected Site fetchParent() {
+        return SpringContext.getBean(SiteRepository.class).findById(getParentId()).orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
+    public EntityType getType() {
+        return EntityType.Page;
     }
 }

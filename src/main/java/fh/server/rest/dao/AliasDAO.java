@@ -1,6 +1,6 @@
-package fh.server.rest.dto;
+package fh.server.rest.dao;
 
-public class AliasBlueprint extends ArtifactBlueprint {
+public class AliasDAO extends ArtifactDAO {
 
     private String name;
 

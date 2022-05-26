@@ -1,30 +1,42 @@
 package fh.server.controller;
 
 import fh.server.entity.Account;
-import fh.server.entity.Alias;
+import fh.server.entity.Entity;
 import fh.server.entity.Site;
+import fh.server.rest.dao.SiteDAO;
 import fh.server.rest.dto.*;
 import fh.server.rest.mapper.DTOMapper;
+import fh.server.rest.mapper.PruningMapper;
 import fh.server.service.AccountService;
-import fh.server.service.AliasService;
+import fh.server.service.AuthenticationService;
 import fh.server.service.SiteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 public class SiteController {
 
     private final SiteService siteService;
+    private final AuthenticationService authenticationService;
     private final AccountService accountService;
 
     SiteController(
             SiteService siteService,
+            AuthenticationService authenticationService,
             AccountService accountService
     ) {
         this.siteService = siteService;
+        this.authenticationService = authenticationService;
         this.accountService = accountService;
+    }
+
+    @GetMapping("/check-site/{siteName}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Boolean checkSite(
+            @PathVariable("siteName") String identifier
+    ) {
+        return siteService.existsByName(identifier);
     }
 
     /**
@@ -42,7 +54,7 @@ public class SiteController {
     @ResponseBody
     public SiteDTO create(
             @RequestHeader("Authorization") String token,
-            @RequestBody SiteBlueprint data
+            @RequestBody SiteDAO data
     ) {
         Account principal = accountService.fetchByToken(token);
         Site created = siteService.createSite(data, principal);
@@ -50,19 +62,32 @@ public class SiteController {
     }
 
 
-    @PutMapping("/site/{siteName}")
+    @PutMapping("/modify-site/{siteName}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public SiteDTO update(
             @RequestHeader("Authorization") String token,
             @PathVariable("siteName") String siteName,
-            @RequestBody SiteBlueprint data
+            @RequestBody SiteDAO data
     ) {
-        Account principal = accountService.fetchByToken(token);
         Site site = siteService.fetchSiteByName(siteName);
+        Entity principal = authenticationService.principal(site, token);
 
-        Site updated = siteService.update(site, data, principal);
-        return DTOMapper.INSTANCE.map(updated); // no pruning needed; principal must be owner
+        Site updated = siteService.operate(site, data, principal);
+        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(updated, principal));
+    }
+
+
+    @GetMapping("/site/{siteName}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public SiteDTO get(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("siteName") String siteName
+    ) {
+        Site site = siteService.fetchSiteByName(siteName);
+        Entity principal = authenticationService.principal(site, token);
+        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(site, principal));
     }
 
 

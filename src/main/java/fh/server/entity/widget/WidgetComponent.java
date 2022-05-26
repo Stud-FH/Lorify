@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @javax.persistence.Entity
 @Inheritance(strategy=InheritanceType.JOINED)
-public abstract class WidgetComponent extends Artifact {
+public abstract class WidgetComponent extends fh.server.entity.Entity {
 
     public abstract ComponentType getComponentType();
 }

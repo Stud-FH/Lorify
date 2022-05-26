@@ -1,22 +1,25 @@
 package fh.server.rest.dto;
 
+import fh.server.constant.TrustLevel;
+
 public class AliasDTO extends ArtifactDTO {
-
-    private String siteId;
-
-    private String accessor;
 
     private String name;
 
+    private String accessor;
+
+    private Boolean claimed;
 
 
 
-    public String getSiteId() {
-        return siteId;
+
+
+    public String getName() {
+        return name;
     }
 
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAccessor() {
@@ -27,11 +30,20 @@ public class AliasDTO extends ArtifactDTO {
         this.accessor = accessor;
     }
 
-    public String getName() {
-        return name;
+    public Boolean getClaimed() {
+        return claimed;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setClaimed(Boolean claimed) {
+        this.claimed = claimed;
+    }
+
+    @Override
+    public AliasDTO prune(TrustLevel principalClearance) {
+        if (!principalClearance.meets(accessRequirements.get("get-name"))) name = null;
+        if (!principalClearance.meets(accessRequirements.get("get-accessor"))) accessor = null;
+        if (!principalClearance.meets(accessRequirements.get("get-claimed"))) claimed = null;
+        super.prune(principalClearance);
+        return this;
     }
 }

@@ -1,16 +1,12 @@
 package fh.server.helpers.interpreter;
 
 import fh.server.entity.widget.Poll;
-import fh.server.helpers.Context;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @FunctionalInterface
 public interface SStream extends GenericStream<String> {
-
-    Stream<String> resolve(Context context);
 
     static <T> SStream convert(GenericStream<T> arg0) {
         return context -> arg0.resolve(context).map(T::toString);
@@ -21,7 +17,7 @@ public interface SStream extends GenericStream<String> {
     }
 
     static SStream pollQuantificationKeys() {
-        return context -> context.getPoll().getQuantification().keySet().stream();
+        return context -> context.victimAsPoll().getQuantification().keySet().stream();
     }
 
     static SStream split(S arg0, S arg1) {
@@ -33,6 +29,6 @@ public interface SStream extends GenericStream<String> {
     }
 
     static SStream inputMc() {
-        return context -> Arrays.stream(context.getInput().split(Poll.MC_SEPARATOR));
+        return context -> Arrays.stream(context.getValue().split(Poll.MC_SEPARATOR));
     }
 }

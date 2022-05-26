@@ -1,28 +1,21 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
 import org.assertj.core.util.TriFunction;
 
 import java.util.function.BiFunction;
 
 @FunctionalInterface
 public interface S extends Generic<String> {
-    
-    String resolve(Context context);
 
     static <T> S convert(Generic<T> arg0) {
         return context -> arg0.resolve(context).toString();
     }
 
-    static S artifactAttrib(S arg0) {
-        return context -> context.getArtifact().getAttribute(arg0.resolve(context));
+    static S victimAttribute(S arg0) {
+        return context -> context.getVictim().getAttribute(arg0.resolve(context));
     }
 
-    static S aliasAttrib(S arg0) {
-        return context -> context.getAlias().getAttribute(arg0.resolve(context));
-    }
-
-    static S principalAttrib(S arg0) {
+    static S principalAttribute(S arg0) {
         return context -> context.getPrincipal().getAttribute(arg0.resolve(context));
     }
 

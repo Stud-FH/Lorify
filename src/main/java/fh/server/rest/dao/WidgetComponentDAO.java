@@ -1,11 +1,10 @@
-package fh.server.rest.dto;
+package fh.server.rest.dao;
 
 import fh.server.constant.ComponentType;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class WidgetComponentBlueprint extends ArtifactBlueprint {
+public class WidgetComponentDAO extends ArtifactDAO {
 
     private ComponentType componentType;
 

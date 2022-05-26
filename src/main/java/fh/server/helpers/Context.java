@@ -1,151 +1,90 @@
 package fh.server.helpers;
 
+import fh.server.constant.EntityType;
 import fh.server.entity.*;
 import fh.server.entity.widget.Poll;
 import fh.server.entity.widget.Widget;
 
+import java.util.function.Supplier;
+
 public class Context {
 
-    private String input;
+    private final Supplier<Entity> principalSupplier;
+    private final Supplier<Entity> victimSupplier;
 
-    private Entity entity;
+    private Entity principal;
+    private Entity victim;
 
-    private Artifact artifact;
-
-    private Site site;
-
-    private Page page;
-
-    private Widget widget;
-
-    private Poll poll;
-
-    private Account principal;
-
-    private Alias alias;
-
-    private boolean locked;
-
-    private Context() {
-
+    protected Context(Context parent) {
+        this.principalSupplier = parent.principalSupplier;
+        this.victimSupplier = parent.victimSupplier;
+        this.principal = parent.principal;
+        this.victim = parent.victim;
     }
 
-    public static ContextBuilder build() {
-        return new ContextBuilder();
+    public Context(
+            Supplier<Entity> principalSupplier,
+            Supplier<Entity> victimSupplier) {
+        this.principalSupplier = principalSupplier;
+        this.victimSupplier = victimSupplier;
     }
 
-    public static class ContextBuilder {
-        private final Context context = new Context();
+    public Context(Entity principal, Entity victim) {
+        this.principalSupplier = () -> principal;
+        this.victimSupplier = () -> victim;
+    }
 
-        public ContextBuilder input(String input) {
-            if (context.locked) throw new IllegalStateException();
-            context.input = input;
-            return this;
-        }
-
-        public ContextBuilder entity(Entity entity) {
-            if (context.locked) throw new IllegalStateException();
-            context.entity = entity;
-            return this;
-        }
-
-        public ContextBuilder artifact(Artifact artifact) {
-            if (context.locked) throw new IllegalStateException();
-            context.artifact = artifact;
-            return this;
-        }
-
-        public ContextBuilder site(Site site) {
-            if (context.locked) throw new IllegalStateException();
-            context.site = site;
-            return this;
-        }
-
-        public ContextBuilder page(Page page) {
-            if (context.locked) throw new IllegalStateException();
-            context.page = page;
-            return this;
-        }
-
-        public ContextBuilder widget(Widget widget) {
-            if (context.locked) throw new IllegalStateException();
-            context.widget = widget;
-            return this;
-        }
-
-        public ContextBuilder poll(Poll poll) {
-            if (context.locked) throw new IllegalStateException();
-            context.poll = poll;
-            return this;
-        }
-
-        public ContextBuilder principal(Account principal) {
-            if (context.locked) throw new IllegalStateException();
-            context.principal = principal;
-            return this;
-        }
-
-        public ContextBuilder alias(Alias alias) {
-            if (context.locked) throw new IllegalStateException();
-            context.alias = alias;
-            return this;
-        }
-
-        public Context dispatch() {
-            context.locked = true;
-            return context;
-        }
+    public Operation operation(String operation, Object value, Object previous) {
+        return new Operation(this, operation, value, previous);
     }
 
 
-    public String getInput() {
-        return input;
+    public Entity getPrincipal() {
+        return principal == null? (principal = principalSupplier.get()) : principal;
     }
 
-    public Entity getEntity() {
-        return entity;
+    public Alias principalAsAlias() {
+        return (Alias) getPrincipal();
     }
 
-    public Artifact getArtifact() {
-        return artifact;
+    public Account principalAsAccount() {
+        return (Account) getPrincipal();
     }
 
-    public Site getSite() {
-        return site;
+    public Entity getVictim() {
+        return victim == null? (victim = victimSupplier.get()) : victim;
     }
 
-    public Page getPage() {
-        return page;
+    public Alias victimAsAlias() {
+        return (Alias) getVictim();
     }
 
-    public Widget getWidget() {
-        return widget;
+    public Poll victimAsPoll() {
+        return (Poll) getVictim();
     }
 
-    public Poll getPoll() {
-        return poll;
+    public Site victimAsSite() {
+        return (Site) getVictim();
     }
 
-    public Account getPrincipal() {
-        return principal;
+    public Page victimAsPage() {
+        return (Page) getVictim();
     }
 
-    public Alias getAlias() {
-        return alias;
+    public Widget victimAsWidget() {
+        return (Widget) getVictim();
     }
 
-    @Override
-    public String toString() {
-        return "Context{" +
-                "input='" + input + '\'' +
-                ", entity=" + entity +
-                ", artifact=" + artifact +
-                ", site=" + site +
-                ", page=" + page +
-                ", widget=" + widget +
-                ", poll=" + poll +
-                ", principal=" + principal +
-                ", alias=" + alias +
-                '}';
+    public EntityType victimType() {
+        return getVictim().getType();
     }
+
+    public EntityType principalType() {
+        return getPrincipal().getType();
+    }
+
+    public boolean isOwnerAccess() {
+        return getVictim().getOwnerId().equals(getPrincipal().getId());
+    }
+
 }

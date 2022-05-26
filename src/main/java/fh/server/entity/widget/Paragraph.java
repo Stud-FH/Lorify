@@ -1,6 +1,7 @@
 package fh.server.entity.widget;
 
 import fh.server.constant.ComponentType;
+import fh.server.constant.EntityType;
 
 import javax.persistence.Column;
 
@@ -25,5 +26,10 @@ public class Paragraph extends WidgetComponent {
     @Override
     public ComponentType getComponentType() {
         return ComponentType.Paragraph;
+    }
+
+    @Override
+    public EntityType getType() {
+        return EntityType.Paragraph;
     }
 }

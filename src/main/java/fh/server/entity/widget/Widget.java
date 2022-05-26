@@ -1,13 +1,12 @@
 package fh.server.entity.widget;
 
-import fh.server.entity.Artifact;
-import fh.server.entity.Page;
+import fh.server.constant.EntityType;
 
 import javax.persistence.*;
 import java.util.*;
 
 @javax.persistence.Entity
-public class Widget extends Artifact {
+public class Widget extends fh.server.entity.Entity {
 
     @Column
     private String name;
@@ -63,4 +62,8 @@ public class Widget extends Artifact {
         setLastModified(System.currentTimeMillis());
     }
 
+    @Override
+    public EntityType getType() {
+        return EntityType.Widget;
+    }
 }

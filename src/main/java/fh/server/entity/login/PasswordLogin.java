@@ -1,5 +1,6 @@
 package fh.server.entity.login;
 
+import fh.server.constant.EntityType;
 import fh.server.constant.LoginMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,5 +55,10 @@ public class PasswordLogin extends Login {
     @Override
     public LoginMethod getLoginMethod() {
         return LoginMethod.Password;
+    }
+
+    @Override
+    public EntityType getType() {
+        return EntityType.PasswordLogin;
     }
 }

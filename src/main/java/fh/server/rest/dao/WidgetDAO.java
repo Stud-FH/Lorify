@@ -1,13 +1,13 @@
-package fh.server.rest.dto;
+package fh.server.rest.dao;
 
 import java.util.Map;
 import java.util.Set;
 
-public class WidgetBlueprint extends ArtifactBlueprint {
+public class WidgetDAO extends ArtifactDAO {
 
     private String name;
 
-    private Map<String, WidgetComponentBlueprint> components;
+    private Map<String, WidgetComponentDAO> components;
 
     private Map<String, String> componentIds;
 
@@ -24,11 +24,11 @@ public class WidgetBlueprint extends ArtifactBlueprint {
         this.name = name;
     }
 
-    public Map<String, WidgetComponentBlueprint> getComponents() {
+    public Map<String, WidgetComponentDAO> getComponents() {
         return components;
     }
 
-    public void setComponents(Map<String, WidgetComponentBlueprint> components) {
+    public void setComponents(Map<String, WidgetComponentDAO> components) {
         this.components = components;
     }
 

@@ -1,45 +1,26 @@
 package fh.server.entity;
 
-import fh.server.constant.AliasManagementPolicy;
+import fh.server.constant.EntityType;
 import fh.server.constant.SiteVisibility;
-import fh.server.entity.widget.Widget;
 import fh.server.helpers.Tokens;
-import fh.server.helpers.interpreter.B;
-import fh.server.helpers.interpreter.DescriptionInterpreter;
 
 import javax.persistence.*;
 import java.util.*;
 
 @javax.persistence.Entity
-public class Site extends Artifact {
+public class Site extends Entity {
 
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(length = 2000)
-    private String creatorGuardDescription;
-
-    @Transient
-    private transient B creatorGuard;
+    @Column(nullable = false)
+    private SiteVisibility visibility;
 
     @ManyToMany
     private final Map<String, Alias> aliases = new HashMap<>();
 
     @ManyToMany
     private final Map<String, Page> pages = new HashMap<>();
-
-    @Column(nullable = false)
-    private SiteVisibility visibility;
-
-    @Column(nullable = false)
-    private AliasManagementPolicy nameManagementPolicy;
-
-    @Column(nullable = false)
-    private AliasManagementPolicy tagManagementPolicy;
-
-    @Column(nullable = false)
-    private AliasManagementPolicy attributeManagementPolicy;
-
 
 
 
@@ -52,20 +33,13 @@ public class Site extends Artifact {
         setLastModified(System.currentTimeMillis());
     }
 
-    public String getCreatorGuardDescription() {
-        return creatorGuardDescription;
+    public SiteVisibility getVisibility() {
+        return visibility;
     }
 
-    public void setCreatorGuardDescription(String s) {
-        this.creatorGuardDescription = s;
+    public void setVisibility(SiteVisibility visibility) {
+        this.visibility = visibility;
         setLastModified(System.currentTimeMillis());
-    }
-
-    public B getCreatorGuard() {
-        if (creatorGuard == null) {
-            creatorGuard = DescriptionInterpreter.resilientB(creatorGuardDescription);
-        }
-        return creatorGuard;
     }
 
     public Map<String, Alias> getAliases() {
@@ -92,10 +66,10 @@ public class Site extends Artifact {
         setLastModified(System.currentTimeMillis());
         String token;
         do {
-            token = Tokens.random(8);
+            token = Tokens.randomAliasToken();
         } while (aliases.containsKey(token));
         Alias alias = new Alias();
-        alias.setSiteId(getId());
+        alias.setParentId(getId());
         alias.setAccessor(token);
         alias.setName(name);
         aliases.put(token, alias);
@@ -107,7 +81,7 @@ public class Site extends Artifact {
         if (aliases.containsKey(account.getId())) throw new IllegalStateException();
         Alias alias = aliases.remove(token);
         if (alias == null) throw new NoSuchElementException();
-        alias.setAccessor(account.getId());
+        alias.claim(account);
         aliases.put(account.getId(), alias);
         setLastModified(System.currentTimeMillis());
         return alias;
@@ -149,45 +123,14 @@ public class Site extends Artifact {
         pages.keySet().stream().filter(k -> pages.get(k).equals(page)).forEach(pages::remove);
     }
 
-    public void putWidgets(Map<String, Page> pages) {
+    public void putPages(Map<String, Page> pages) {
         if (pages == null) return;
         this.pages.putAll(pages);
         setLastModified(System.currentTimeMillis());
     }
 
-    public SiteVisibility getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(SiteVisibility visibility) {
-        this.visibility = visibility;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public AliasManagementPolicy getNameManagementPolicy() {
-        return nameManagementPolicy;
-    }
-
-    public void setNameManagementPolicy(AliasManagementPolicy nameManagementPolicy) {
-        this.nameManagementPolicy = nameManagementPolicy;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public AliasManagementPolicy getTagManagementPolicy() {
-        return tagManagementPolicy;
-    }
-
-    public void setTagManagementPolicy(AliasManagementPolicy tagManagementPolicy) {
-        this.tagManagementPolicy = tagManagementPolicy;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public AliasManagementPolicy getAttributeManagementPolicy() {
-        return attributeManagementPolicy;
-    }
-
-    public void setAttributeManagementPolicy(AliasManagementPolicy attributeManagementPolicy) {
-        this.attributeManagementPolicy = attributeManagementPolicy;
-        setLastModified(System.currentTimeMillis());
+    @Override
+    public EntityType getType() {
+        return EntityType.Site;
     }
 }

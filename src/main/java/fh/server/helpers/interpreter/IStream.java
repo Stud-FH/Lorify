@@ -1,17 +1,12 @@
 package fh.server.helpers.interpreter;
 
 import fh.server.entity.widget.Poll;
-import fh.server.helpers.Context;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.stream.Stream;
 
 @FunctionalInterface
 public interface IStream extends GenericStream<Integer> {
-
-    Stream<Integer> resolve(Context context);
-
 
     static IStream convert(BStream arg0) {
         return context -> arg0.resolve(context).map(b -> b? 1 : 0);
@@ -65,12 +60,12 @@ public interface IStream extends GenericStream<Integer> {
 
     static IStream pollSubmissionQuantification() {
         return context -> {
-            Poll poll = context.getPoll();
+            Poll poll = context.victimAsPoll();
             return poll.getSubmissions().values().stream().map(poll::getQuantification);
         };
     }
 
     static IStream pollQuantification(SStream arg0) {
-        return context -> arg0.resolve(context).map(context.getPoll()::getQuantification);
+        return context -> arg0.resolve(context).map(context.victimAsPoll()::getQuantification);
     }
 }

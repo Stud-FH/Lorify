@@ -1,5 +1,5 @@
 package fh.server.constant;
 
 public enum LoginMethod {
-    Token, Password, OAuth2
+    Password, OAuth2
 }

@@ -1,12 +1,9 @@
 package fh.server.helpers.interpreter;
 
 import fh.server.entity.widget.Poll;
-import fh.server.helpers.Context;
 
 @FunctionalInterface
 public interface I extends Generic<Integer> {
-    
-    Integer resolve(Context context);
 
     static I convert(S arg0) {
         return context -> Integer.parseInt(arg0.resolve(context));
@@ -58,12 +55,12 @@ public interface I extends Generic<Integer> {
 
     static I pollLoad() {
         return context -> {
-            Poll poll = context.getPoll();
+            Poll poll = context.victimAsPoll();
             return poll.getSubmissions().values().stream().mapToInt(poll::getQuantification).sum();
         };
     }
 
     static I pollQuantification(S arg0) {
-        return context -> context.getPoll().getQuantification(arg0.resolve(context));
+        return context -> context.victimAsPoll().getQuantification(arg0.resolve(context));
     }
 }

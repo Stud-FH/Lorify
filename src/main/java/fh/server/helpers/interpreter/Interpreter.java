@@ -1,12 +1,13 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
+import fh.server.helpers.Operation;
+import fh.server.constant.TrustLevel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class DescriptionInterpreter {
+public abstract class Interpreter {
 
     public static B interpretB(String description) {
         return b(new Tokenizer(description));
@@ -48,8 +49,41 @@ public abstract class DescriptionInterpreter {
         return ls(new Tokenizer(description));
     }
 
+    public static GStream resilientGStream(String description) {
+        if (description == null) return null;
+        return gs(new Tokenizer(description));
+    }
+
+    public static B resilientB(String description, B ifNull) {
+        return B.evadeException(description == null? ifNull : b(new Tokenizer(description)));
+    }
+
     public static B resilientB(String description) {
-        return description == null? B.tautology() : B.evadeException(b(new Tokenizer(description)));
+        return description == null? B.positive() : B.evadeException(b(new Tokenizer(description)));
+    }
+
+    protected static G g(Tokenizer t) {
+        if (t.tryConsume("'")) {
+            TrustLevel constant = TrustLevel.valueOf(t.until("'"));
+            return context -> constant;
+        }
+        G parsed = selectG(t.until("("), t);
+        t.forceConsume(")");
+        return parsed;
+    }
+
+    protected static GStream gs(Tokenizer t) {
+        if (t.tryConsume("[")) {
+            List<G> list = new ArrayList<>();
+            do {
+                list.add(g(t));
+            } while (!t.tryConsume(", "));
+            t.forceConsume("]");
+            return context -> list.stream().map(f -> f.resolve(context));
+        }
+        GStream parsed = selectGStream(t.until("("), t);
+        t.forceConsume(")");
+        return parsed;
     }
 
     protected static B b(Tokenizer t) {
@@ -172,14 +206,36 @@ public abstract class DescriptionInterpreter {
         return parsed;
     }
 
+    protected static G selectG(String selector, Tokenizer t) {
+        switch(selector) {
+            case "test-owner": return G.ownership();
+            case "operator": return G.operator();
+            case "operator-if": return G.operatorIf(b(t));
+            case "operator-unless": return G.operatorUnless(b(t));
+            case "viewer": return G.viewer();
+            case "viewer-if": return G.viewerIf(b(t));
+            case "viewer-unless": return G.viewerUnless(b(t));
+            case "excluded": return G.excluded();
+            case "excluded-if": return G.excludedIf(b(t));
+            case "excluded-unless": return G.excludedUnless(b(t));
+
+            default: throw new SyntaxError();
+        }
+    }
+
+    protected static GStream selectGStream(String selector, Tokenizer t) {
+        switch(selector) {
+
+            default: throw new SyntaxError();
+        }
+    }
+
     protected static B selectB(String selector, Tokenizer t) {
         switch(selector) {
             case "convert-s": return B.convert(s(t));
             case "convert-i": return B.convert(i(t));
             case "convert-d": return B.convert(d(t));
             case "convert-l": return B.convert(l(t));
-            case "artifact-owner": return context -> context.getArtifact().hasOwner(context.getPrincipal());
-            case "has-principal": return context -> context.getPrincipal() != null;
             case "not": return B.not(b(t));
             case "and": return B.and(b(t), b(t));
             case "or": return B.or(b(t), b(t));
@@ -191,16 +247,15 @@ public abstract class DescriptionInterpreter {
             case "either": return B.either(bs(t));
             case "none": return B.none(bs(t));
             case "uniform": return B.uniform(bs(t));
-            case "artifact-tag": return B.artifactTag(s(t));
-            case "alias-tag": return B.aliasTag(s(t));
+            case "victim-tag": return B.victimTag(s(t));
+            case "principal-tag": return B.principalTag(s(t));
             case "poll-has-quantification": return B.pollHasQuantification(s(t));
             case "poll-option": return B.pollOption();
             case "poll-option-mc": return B.pollOptionMc();
             case "poll-limit": return B.pollLimit();
             case "poll-limit-mc": return B.pollLimitMc();
-            case "artifact-has-attrib": return B.artifactHasAttrib(s(t));
-            case "alias-has-attrib": return B.aliasHasAttrib(s(t));
-            case "principal-has-attrib": return B.principalHasAttrib(s(t));
+            case "victim-has-attribute": return B.victimHasAttribute(s(t));
+            case "principal-has-attribute": return B.principalHasAttribute(s(t));
             case "i-equals": return B.compareAdjacent(is(t), Integer::equals);
             case "i-distinct": return B.listDistinct(is(t));
             case "d-equals": return B.compareAdjacent(ds(t), (a,b) -> Math.abs(a-b) < 1e-6);
@@ -265,11 +320,12 @@ public abstract class DescriptionInterpreter {
             case "convert-i": return S.convert(i(t));
             case "convert-d": return S.convert(d(t));
             case "convert-l": return S.convert(l(t));
-            case "input": return Context::getInput;
-            case "alias-poll-submission": return context -> context.getPoll().getSubmission(context.getAlias());
-            case "artifact-attrib": return S.artifactAttrib(s(t));
-            case "alias-attrib": return S.aliasAttrib(s(t));
-            case "principal-attrib": return S.principalAttrib(s(t));
+            case "operation": return Operation::getOperation;
+            case "value": return Operation::getValue;
+            case "previous": return Operation::getPrevious;
+            case "alias-poll-submission": return context -> context.victimAsPoll().getSubmission(context.principalAsAlias());
+            case "victim-attribute": return S.victimAttribute(s(t));
+            case "principal-attribute": return S.principalAttribute(s(t));
             case "drop-first": return S.modifyInt(i(t), s(t), (i, s) -> s.substring(i));
             case "drop-last": return S.modifyInt(i(t), s(t), (i, s) -> s.substring(0, s.length() -i));
             case "keep-first": return S.modifyInt(i(t), s(t), (i, s) -> s.substring(0, i));

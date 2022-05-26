@@ -1,25 +1,16 @@
 package fh.server.service;
 
-import fh.server.constant.LoginMethod;
 import fh.server.entity.Account;
-import fh.server.entity.Site;
 import fh.server.entity.login.Login;
 import fh.server.entity.login.PasswordLogin;
-import fh.server.entity.login.TokenLogin;
-import fh.server.helpers.Tokens;
 import fh.server.repository.*;
-import fh.server.rest.dto.AttributeBlueprint;
-import fh.server.rest.dto.LoginBlueprint;
-import fh.server.rest.dto.LoginDTO;
+import fh.server.rest.dao.LoginDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.annotation.PostConstruct;
-import java.util.UUID;
 
 @Service
 public class AccountService extends EntityService {
@@ -30,21 +21,27 @@ public class AccountService extends EntityService {
 
     private final AccountRepository accountRepository;
     private final LoginRepository loginRepository;
-    private final TokenLoginRepository tokenLoginRepository;
     private final PasswordLoginRepository passwordLoginRepository;
 
     public AccountService(
             @Qualifier("entityRepository") EntityRepository entityRepository,
             @Qualifier("accountRepository") AccountRepository accountRepository,
             @Qualifier("loginRepository") LoginRepository loginRepository,
-            @Qualifier("tokenLoginRepository") TokenLoginRepository tokenLoginRepository,
             @Qualifier("passwordLoginRepository") PasswordLoginRepository passwordLoginRepository
     ) {
         super(entityRepository);
         this.accountRepository = accountRepository;
         this.loginRepository = loginRepository;
-        this.tokenLoginRepository = tokenLoginRepository;
         this.passwordLoginRepository = passwordLoginRepository;
+    }
+
+
+    public boolean existsById(String id) {
+        return accountRepository.existsById(id);
+    }
+
+    public boolean existsByIdentifier(String identifier) {
+        return passwordLoginRepository.existsByIdentifier(identifier);
     }
 
     public Account fetchById(String id) {
@@ -54,9 +51,8 @@ public class AccountService extends EntityService {
 
     public Account fetchByToken(String token) {
         checkNotEmpty(token, "Authorization header");
-        TokenLogin tokenLogin = tokenLoginRepository.findByToken(token)
+        return accountRepository.findByToken(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "token not found"));
-        return fetchById(tokenLogin.getAccountId());
     }
 
     public Login fetchLogin(String id) {
@@ -64,49 +60,43 @@ public class AccountService extends EntityService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "login not found"));
     }
 
-    public Account login(LoginBlueprint login) {
+    public Account login(LoginDAO login) throws InterruptedException {
         switch(login.getLoginMethod()) {
-            case Token: return fetchByToken(login.getToken());
             case Password: {
+                long targetTime = System.currentTimeMillis() +1000;
+
                 PasswordLogin passwordLogin = passwordLoginRepository.findByIdentifier(login.getIdentifier())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong identity or password"));
                 if (!passwordLogin.matches(login.getPassword()))
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong identity or password");
-                return fetchById(passwordLogin.getAccountId());
+                Account account = fetchById(passwordLogin.getOwnerId());
+                long waitingTime = targetTime - System.currentTimeMillis();
+                LOGGER.info("waiting "+waitingTime+"ms before answering login request");
+                if (waitingTime > 0) Thread.sleep(waitingTime);
+                return account;
             }
             case OAuth2:
             default: throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "unexpected login method");
         }
-        // todo wait
     }
 
-    public TokenLogin create(LoginBlueprint loginBlueprint) {
-        checkLoginBlueprint(loginBlueprint); // check twice to avoid creating a zombie account
-        Account account = accountRepository.saveAndFlush(new Account());
+    public Account create(LoginDAO dao) {
+        checkLoginBlueprint(dao); // check twice to avoid creating a zombie account
+        Account account = new Account();
+        account.setOwnerId(account.getId());
+        account = accountRepository.saveAndFlush(account);
         LOGGER.info(String.format("account created: %s", account));
-        addLogin(loginBlueprint, account);
-        LoginBlueprint tokenBlueprint = new LoginBlueprint();
-        tokenBlueprint.setLoginMethod(LoginMethod.Token);
-        tokenBlueprint.setToken(UUID.randomUUID().toString());
-        return (TokenLogin) addLogin(tokenBlueprint, account);
+        return addLogin(dao, account);
     }
 
-    public Login addLogin(LoginBlueprint loginBlueprint, Account principal) {
+    public Account addLogin(LoginDAO loginBlueprint, Account principal) {
         checkLoginBlueprint(loginBlueprint);
 
         Login login;
         switch(loginBlueprint.getLoginMethod()) {
-            case Token:
-                TokenLogin tokenLogin = new TokenLogin();
-                tokenLogin.setAccountId(principal.getId());
-                tokenLogin.setToken(loginBlueprint.getToken());
-                loginRepository.saveAndFlush(tokenLogin);
-                tokenLoginRepository.saveAndFlush(tokenLogin);
-                login = tokenLogin;
-                break;
             case Password:
                 PasswordLogin passwordLogin = new PasswordLogin();
-                passwordLogin.setAccountId(principal.getId());
+                passwordLogin.setOwner(principal);
                 passwordLogin.setIdentifier(loginBlueprint.getIdentifier());
                 passwordLogin.setPassword(loginBlueprint.getPassword());
                 loginRepository.saveAndFlush(passwordLogin);
@@ -119,7 +109,7 @@ public class AccountService extends EntityService {
         principal.addLogin(login);
         accountRepository.flush();
         LOGGER.info(String.format("account login added: %s <- %s", principal, login));
-        return login;
+        return principal;
     }
 
     public Account removeLogin(String loginId, Account principal) {
@@ -135,7 +125,7 @@ public class AccountService extends EntityService {
     }
 
     private void checkTokenUnique(String token) {
-        if (tokenLoginRepository.existsByToken(token))
+        if (accountRepository.existsByToken(token))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "token collision"); // TODO security gap
     }
 
@@ -160,13 +150,9 @@ public class AccountService extends EntityService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "missing rights on this login");
     }
 
-    private void checkLoginBlueprint(LoginBlueprint blueprint) {
+    private void checkLoginBlueprint(LoginDAO blueprint) {
         checkNotNull(blueprint);
         switch (blueprint.getLoginMethod()) {
-            case Token:
-                checkNotEmpty(blueprint.getToken(), "token");
-                checkTokenUnique(blueprint.getToken());
-                break;
             case Password:
                 checkNotEmpty(blueprint.getIdentifier(), "identifier");
                 checkIdentifierUnique(blueprint.getIdentifier());

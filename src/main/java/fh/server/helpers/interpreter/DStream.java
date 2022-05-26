@@ -1,14 +1,9 @@
 package fh.server.helpers.interpreter;
 
-import fh.server.helpers.Context;
-
 import java.util.Iterator;
-import java.util.stream.Stream;
 
 @FunctionalInterface
 public interface DStream extends GenericStream<Double> {
-    
-    Stream<Double> resolve(Context context);
 
     static DStream convert(BStream arg0) {
         return context -> arg0.resolve(context).map(b -> b? 1.0 : 0.0);

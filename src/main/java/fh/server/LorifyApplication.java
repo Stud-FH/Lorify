@@ -14,10 +14,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RestController
 @SpringBootApplication
-public class QsApplication {
+public class LorifyApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(QsApplication.class, args);
+		SpringApplication.run(LorifyApplication.class, args);
 	}
 
 

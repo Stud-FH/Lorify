@@ -1,9 +1,10 @@
 package fh.server.entity.widget;
 
 import fh.server.constant.ComponentType;
+import fh.server.constant.EntityType;
 import fh.server.entity.Alias;
 import fh.server.helpers.interpreter.B;
-import fh.server.helpers.interpreter.DescriptionInterpreter;
+import fh.server.helpers.interpreter.Interpreter;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -20,18 +21,6 @@ public class Poll extends WidgetComponent {
     @Column
     private String formulation;
 
-    @Column(length = 2000)
-    private String submissionGuardDescription;
-
-    @Transient
-    private transient B submissionGuard;
-
-    @Column(length = 2000)
-    private String inspectorGuardDescription;
-
-    @Transient
-    private transient B inspectorGuard;
-
     @ElementCollection
     private final Map<String, String> submissions = new HashMap<>(); // key is alias id
 
@@ -47,38 +36,6 @@ public class Poll extends WidgetComponent {
 
     public void setFormulation(String formulation) {
         this.formulation = formulation;
-    }
-
-    public String getSubmissionGuardDescription() {
-        return submissionGuardDescription;
-    }
-
-    public void setSubmissionGuardDescription(String s) {
-        this.submissionGuardDescription = s;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public B getSubmissionGuard() {
-        if (submissionGuard == null) {
-            submissionGuard = DescriptionInterpreter.resilientB(submissionGuardDescription);
-        }
-        return submissionGuard;
-    }
-
-    public String getInspectorGuardDescription() {
-        return inspectorGuardDescription;
-    }
-
-    public void setInspectorGuardDescription(String s) {
-        this.inspectorGuardDescription = s;
-        setLastModified(System.currentTimeMillis());
-    }
-
-    public B getInspectorGuard() {
-        if (inspectorGuard == null) {
-            inspectorGuard = DescriptionInterpreter.resilientB(inspectorGuardDescription);
-        }
-        return inspectorGuard;
     }
 
     public Map<String, String> getSubmissions() {
@@ -150,4 +107,8 @@ public class Poll extends WidgetComponent {
         return ComponentType.Poll;
     }
 
+    @Override
+    public EntityType getType() {
+        return EntityType.Poll;
+    }
 }

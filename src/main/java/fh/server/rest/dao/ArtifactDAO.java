@@ -1,12 +1,12 @@
-package fh.server.rest.dto;
+package fh.server.rest.dao;
 
 import java.util.Set;
 
-public class ArtifactBlueprint extends EntityBlueprint {
+public class ArtifactDAO extends EntityDAO {
 
     private String comments;
 
-    private String visibilityGuardDescription;
+    private String visibilityGuard;
 
     private Set<String> tags;
 
@@ -21,12 +21,12 @@ public class ArtifactBlueprint extends EntityBlueprint {
         this.comments = comments;
     }
 
-    public String getVisibilityGuardDescription() {
-        return visibilityGuardDescription;
+    public String getVisibilityGuard() {
+        return visibilityGuard;
     }
 
-    public void setVisibilityGuardDescription(String visibilityGuardDescription) {
-        this.visibilityGuardDescription = visibilityGuardDescription;
+    public void setVisibilityGuard(String visibilityGuard) {
+        this.visibilityGuard = visibilityGuard;
     }
 
     public Set<String> getTags() {

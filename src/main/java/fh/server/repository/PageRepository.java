@@ -11,8 +11,8 @@ import java.util.Optional;
 public interface PageRepository extends JpaRepository<Page, String> {
 
     Optional<Page> findById(String id);
-    Optional<Page> findBySiteIdAndName(String siteId, String name);
+    Optional<Page> findByParentIdAndName(String siteId, String name);
 
     boolean existsById(String id);
-    boolean existsBySiteIdAndName(String siteId, String name);
+    boolean existsByParentIdAndName(String siteId, String name);
 }

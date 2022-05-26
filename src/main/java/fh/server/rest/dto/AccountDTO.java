@@ -8,8 +8,21 @@ import java.util.stream.Collectors;
 
 public class AccountDTO extends EntityDTO {
 
+
+    private String token;
+
     private Set<LoginDTO> logins;
 
+
+
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public Set<LoginDTO> getLogins() {
         return logins;
