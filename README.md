@@ -1,4 +1,4 @@
-# pizzaServer
+# Lorify
 spring boot exercise / resource delivery service api
 
 ## how to use this api
