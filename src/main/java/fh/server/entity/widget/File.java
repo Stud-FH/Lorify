@@ -20,6 +20,7 @@ public class File extends WidgetComponent {
     }
 
     public void setFilename(String filename) {
+        System.out.println(filename);
         this.filename = filename;
         setLastModified(System.currentTimeMillis());
     }

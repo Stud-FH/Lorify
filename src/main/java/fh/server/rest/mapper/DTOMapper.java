@@ -44,11 +44,9 @@ public interface DTOMapper {
     @Mapping(source = "widgets", target = "widgets")
     PageDTO map(Page source);
 
+    @Mapping(source = "name", target = "name")
     @Mapping(source = "components", target = "components")
     WidgetDTO map(Widget source);
-
-    @Mapping(source = "componentType", target = "componentType")
-    WidgetComponentDTO map(WidgetComponent source);
 
     @Mapping(source = "filename", target = "filename")
     @Mapping(source = "data", target = "data")
@@ -77,5 +75,26 @@ public interface DTOMapper {
         }
     }
 
+
+    default WidgetComponentDTO map(WidgetComponent source) {
+        switch (source.getComponentType()) {
+            case Paragraph: return new ParagraphDTO() {{
+                adapt(source);
+                setText(((Paragraph) source).getText());
+            }};
+            case File: return new FileDTO() {{
+                adapt(source);
+                setFilename(((File) source).getFilename());
+                setData(((File) source).getData());
+            }};
+            case Poll: return new PollDTO() {{
+                adapt(source);
+                setFormulation(((Poll) source).getFormulation());
+                setSubmissions(((Poll) source).getSubmissions());
+                setQuantification(((Poll) source).getQuantification());
+            }};
+            default: throw new IllegalStateException();
+        }
+    }
 
 }

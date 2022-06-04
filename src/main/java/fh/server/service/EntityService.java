@@ -42,12 +42,12 @@ public class EntityService {
 
     protected void operate(EntityDAO dao, Context context, EntityService service) {
         checkNotNull(dao);
-        checkNotEmpty(dao.getOreationKeys(), "operation keys");
+        checkNotEmpty(dao.getOperationKeys(), "operation keys");
 
         // SETUP
         List<Operation> operations;
         try {
-            operations = dao.getOreationKeys().stream().map(k -> setup(k, dao, context)).collect(Collectors.toList());
+            operations = dao.getOperationKeys().stream().map(k -> setup(k, dao, context)).collect(Collectors.toList());
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class EntityService {
         String key = opKey.substring( dotIndex +3);
         switch (operation.getOperation().charAt(dotIndex +1)) {
             case 'a': operation.getVictim().putAttribute(key, operation.getValue()); return;
-            case 'r': operation.getVictim().putAccessRequirements(key, TrustLevel.valueOf(operation.getValue().toString())); return;
+            case 'r': operation.getVictim().putAccessRequirements(key, TrustLevel.valueOf(operation.getValue())); return;
             case 'g': operation.getVictim().putGuard(key, operation.getValue()); return;
         }
     }

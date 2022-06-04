@@ -6,10 +6,20 @@ import fh.server.rest.mapper.DTOMapper;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WidgetDTO extends ArtifactDTO {
+public class WidgetDTO extends EntityDTO {
+
+    private String name;
 
     private Map<String, WidgetComponentDTO> components;
 
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Map<String, WidgetComponentDTO> getComponents() {
         return components;

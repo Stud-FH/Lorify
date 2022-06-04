@@ -12,7 +12,7 @@ public class Widget extends fh.server.entity.Entity {
     private String name;
 
     @ManyToMany
-    private Map<String, WidgetComponent> components;
+    private final Map<String, WidgetComponent> components = new HashMap<>();
 
 
 

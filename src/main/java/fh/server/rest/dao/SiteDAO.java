@@ -5,7 +5,7 @@ import fh.server.constant.SiteVisibility;
 import java.util.Map;
 import java.util.Set;
 
-public class SiteDAO extends ArtifactDAO {
+public class SiteDAO extends EntityDAO {
 
     private String name;
 

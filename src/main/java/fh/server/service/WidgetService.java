@@ -67,7 +67,7 @@ public class WidgetService extends EntityService {
         widget.adapt(dao);
         widget.setName(dao.getName());
         widget.setOwner(principal);
-        for (String key : dao.getComponentKeys()) widget.putComponent(key, produce(dao.getComponents().get(key)));
+        for (String key : dao.getComponentKeys()) widget.putComponent(key, produce(dao.getComponents().get(key), principal));
 
         Context context = new Context(principal, null);
         checkNotEmpty(dao.getComponentKeys(), "componentKeys");
@@ -80,22 +80,29 @@ public class WidgetService extends EntityService {
         return widget;
     }
 
-    protected WidgetComponent produce(WidgetComponentDAO dao) {
+    protected WidgetComponent produce(WidgetComponentDAO dao, Account principal) {
+        checkNotNull(dao.getComponentType());
         switch (dao.getComponentType()) {
-            case File: return new File() {{
-                adapt(dao);
-                setFilename(dao.getFilename());
-                setData(dao.getData());
-            }};
-            case Paragraph: return new Paragraph() {{
-                adapt(dao);
-                setText(dao.getText());
-            }};
-            case Poll: return new Poll() {{
-                adapt(dao);
-                setFormulation(dao.getFormulation());
-                putQuantification(dao.getQuantification());
-            }};
+            case File:
+                File file = new File();
+                file.adapt(dao);
+                file.setOwner(principal);
+                file.setFilename(dao.getFilename());
+                file.setData(dao.getData());
+                return file;
+            case Paragraph:
+                Paragraph paragraph = new Paragraph();
+                paragraph.adapt(dao);
+                paragraph.setOwner(principal);
+                paragraph.setText(dao.getText());
+                return paragraph;
+            case Poll:
+                Poll poll = new Poll();
+                poll.adapt(dao);
+                poll.setOwner(principal);
+                poll.setFormulation(dao.getFormulation());
+                poll.putQuantification(dao.getQuantification());
+                return poll;
             default: throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "unexpected component type");
         }
     }

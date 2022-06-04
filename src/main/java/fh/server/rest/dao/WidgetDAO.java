@@ -3,7 +3,7 @@ package fh.server.rest.dao;
 import java.util.Map;
 import java.util.Set;
 
-public class WidgetDAO extends ArtifactDAO {
+public class WidgetDAO extends EntityDAO {
 
     private String name;
 

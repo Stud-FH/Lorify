@@ -4,7 +4,7 @@ import fh.server.constant.ComponentType;
 
 import java.util.Map;
 
-public class WidgetComponentDAO extends ArtifactDAO {
+public class WidgetComponentDAO extends EntityDAO {
 
     private ComponentType componentType;
 

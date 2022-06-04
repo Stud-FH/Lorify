@@ -3,7 +3,7 @@ package fh.server.rest.dao;
 import java.util.Map;
 import java.util.Set;
 
-public class PageDAO extends ArtifactDAO {
+public class PageDAO extends EntityDAO {
 
     private String name;
 

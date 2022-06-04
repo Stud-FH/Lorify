@@ -2,18 +2,12 @@ package fh.server.rest.dto;
 
 import fh.server.constant.ComponentType;
 
-public class WidgetComponentDTO extends ArtifactDTO {
+public abstract class WidgetComponentDTO extends EntityDTO {
 
     private ComponentType componentType;
 
 
 
+    public abstract ComponentType getComponentType();
 
-    public ComponentType getComponentType() {
-        return componentType;
-    }
-
-    public void setComponentType(ComponentType componentType) {
-        this.componentType = componentType;
-    }
 }

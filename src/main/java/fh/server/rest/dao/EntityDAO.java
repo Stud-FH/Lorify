@@ -70,7 +70,7 @@ public class EntityDAO {
         this.guards = guards;
     }
 
-    public Set<String> getOreationKeys() {
+    public Set<String> getOperationKeys() {
         return changelist;
     }
 

@@ -2,7 +2,7 @@ package fh.server.rest.dto;
 
 import fh.server.constant.TrustLevel;
 
-public class AliasDTO extends ArtifactDTO {
+public class AliasDTO extends EntityDTO {
 
     private String name;
 

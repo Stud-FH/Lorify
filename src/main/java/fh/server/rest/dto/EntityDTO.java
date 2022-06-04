@@ -1,6 +1,7 @@
 package fh.server.rest.dto;
 
 import fh.server.constant.TrustLevel;
+import fh.server.entity.Entity;
 
 import java.util.Map;
 
@@ -72,6 +73,16 @@ public class EntityDTO {
 
     public void setLastModified(Long lastModified) {
         this.lastModified = lastModified;
+    }
+
+    public void adapt(Entity source) {
+        setId(source.getId());
+        setParentId(source.getParentId());
+        setOwnerId(source.getOwnerId());
+        setAttributes(source.getAttributes());
+        setAccessRequirements(source.getAccessRequirements());
+        setGuards(source.getGuards());
+        setLastModified(source.getLastModified());
     }
 
     public EntityDTO prune(TrustLevel principalClearance) {

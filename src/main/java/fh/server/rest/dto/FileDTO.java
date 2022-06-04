@@ -1,5 +1,7 @@
 package fh.server.rest.dto;
 
+import fh.server.constant.ComponentType;
+
 public class FileDTO extends WidgetComponentDTO {
 
     private String filename;
@@ -20,5 +22,10 @@ public class FileDTO extends WidgetComponentDTO {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    @Override
+    public ComponentType getComponentType() {
+        return ComponentType.File;
     }
 }

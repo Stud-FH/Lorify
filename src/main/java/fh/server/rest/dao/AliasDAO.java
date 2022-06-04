@@ -1,6 +1,6 @@
 package fh.server.rest.dao;
 
-public class AliasDAO extends ArtifactDAO {
+public class AliasDAO extends EntityDAO {
 
     private String name;
 
