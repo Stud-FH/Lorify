@@ -7,7 +7,7 @@ public class WidgetDAO extends EntityDAO {
 
     private String name;
 
-    private Map<String, WidgetComponentDAO> components;
+    private Map<String, ComponentDAO> components;
 
     private Map<String, String> componentIds;
 
@@ -24,11 +24,11 @@ public class WidgetDAO extends EntityDAO {
         this.name = name;
     }
 
-    public Map<String, WidgetComponentDAO> getComponents() {
+    public Map<String, ComponentDAO> getComponents() {
         return components;
     }
 
-    public void setComponents(Map<String, WidgetComponentDAO> components) {
+    public void setComponents(Map<String, ComponentDAO> components) {
         this.components = components;
     }
 

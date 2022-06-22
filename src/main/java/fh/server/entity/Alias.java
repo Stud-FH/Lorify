@@ -1,59 +1,77 @@
 package fh.server.entity;
 
 import fh.server.constant.EntityType;
+import fh.server.context.Principal;
+import lombok.Getter;
 
 import javax.persistence.*;
+import java.util.Set;
 
+@Getter
 @javax.persistence.Entity
-public class Alias extends Entity {
+public class Alias extends Resource implements Principal {
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne
+    private Account account;
 
-    @Column
-    private String accessor;
+    @Column(nullable = false, unique = true)
+    private String token;
 
-    @Column(nullable = false)
-    private Boolean claimed = false;
-
-
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    private final Set<Submission> submissions = new java.util.LinkedHashSet<>();
 
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAccount(Account account) {
+        this.account = account;
         setLastModified(System.currentTimeMillis());
     }
 
-    public String getAccessor() {
-        return accessor;
+    public String getToken() {
+        return token;
     }
 
-    public void setAccessor(String accessor) {
-        this.accessor = accessor;
+    public void setToken(String token) {
+        this.token = token;
+        setLastModified(System.currentTimeMillis());
     }
 
-    public Boolean getClaimed() {
-        return claimed;
+    public Set<Submission> getSubmissions() {
+        return submissions;
     }
 
-    /**
-     * only for pruning; never use this for DB-entities!
-     */
-    public void setClaimed(Boolean claimed) {
-        this.claimed = claimed;
+    public void addSubmission(Submission submission) {
+        submissions.add(submission);
+        setLastModified(System.currentTimeMillis());
     }
 
-    public void claim(Account account) {
-        this.accessor = account.getId();
+    public void removeSubmission(Submission submission) {
+        submissions.remove(submission);
         setLastModified(System.currentTimeMillis());
     }
 
     @Override
     public EntityType getType() {
         return EntityType.Alias;
+    }
+
+    @Override
+    public boolean hasAlias(Resource resource) {
+        return resource.inherits(getScope());
+    }
+
+    @Override
+    public boolean hasAccount() {
+        return account != null;
+    }
+
+    @Override
+    public Alias getAlias(Resource resource) {
+        return resource.inherits(getScope())? this : null;
+    }
+
+    @Override
+    public Account getAccount() {
+        return account;
     }
 }

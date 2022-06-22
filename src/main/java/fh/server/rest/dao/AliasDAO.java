@@ -1,17 +1,41 @@
 package fh.server.rest.dao;
 
-public class AliasDAO extends EntityDAO {
+import fh.server.entity.Account;
+import lombok.Getter;
+import lombok.Setter;
 
-    private String name;
+@Getter
+@Setter
+public class AliasDAO extends ResourceDAO {
+
+    String accountId;
+    Account account;
+    String token;
 
 
 
 
-    public String getName() {
-        return name;
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

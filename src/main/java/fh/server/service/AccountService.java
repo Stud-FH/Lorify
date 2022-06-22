@@ -69,7 +69,7 @@ public class AccountService extends EntityService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong identity or password"));
                 if (!passwordLogin.matches(login.getPassword()))
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong identity or password");
-                Account account = fetchById(passwordLogin.getOwnerId());
+                Account account = passwordLogin.getOwner();
                 long waitingTime = targetTime - System.currentTimeMillis();
                 LOGGER.info("waiting "+waitingTime+"ms before answering login request");
                 if (waitingTime > 0) Thread.sleep(waitingTime);
@@ -83,7 +83,7 @@ public class AccountService extends EntityService {
     public Account create(LoginDAO dao) {
         checkLoginBlueprint(dao); // check twice to avoid creating a zombie account
         Account account = new Account();
-        account.setOwnerId(account.getId());
+        account.setName(dao.getIdentifier());
         account = accountRepository.saveAndFlush(account);
         LOGGER.info(String.format("account created: %s", account));
         return addLogin(dao, account);
@@ -100,8 +100,7 @@ public class AccountService extends EntityService {
                 passwordLogin.setIdentifier(loginBlueprint.getIdentifier());
                 passwordLogin.setPassword(loginBlueprint.getPassword());
                 loginRepository.saveAndFlush(passwordLogin);
-                passwordLoginRepository.saveAndFlush(passwordLogin);
-                login = passwordLogin;
+                login = passwordLoginRepository.saveAndFlush(passwordLogin);
                 break;
             case OAuth2:
             default: throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "unexpected login method");
@@ -122,6 +121,11 @@ public class AccountService extends EntityService {
         loginRepository.delete(login);
         loginRepository.flush();
         return principal;
+    }
+
+    public void requireAccountExistence(String id) {
+        if (!accountRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "account not found");
     }
 
     private void checkTokenUnique(String token) {

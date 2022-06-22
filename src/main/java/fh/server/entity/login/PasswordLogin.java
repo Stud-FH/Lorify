@@ -13,23 +13,11 @@ public class PasswordLogin extends Login {
 
     private static PasswordEncoder passwordEncoder;
 
-    @Column(unique = true, nullable = false)
-    private String identifier;
-
     @Column(nullable = false)
     private String cipher;
 
 
 
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-        setLastModified(System.currentTimeMillis());
-    }
 
     public String getCipher() {
         return cipher;

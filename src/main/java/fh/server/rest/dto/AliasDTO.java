@@ -1,49 +1,34 @@
 package fh.server.rest.dto;
 
-import fh.server.constant.TrustLevel;
+import fh.server.constant.Permission;
+import fh.server.context.Principal;
+import fh.server.entity.Alias;
+import lombok.Getter;
+import lombok.Setter;
 
-public class AliasDTO extends EntityDTO {
+@Getter
+@Setter
+public class AliasDTO extends ResourceDTO {
 
-    private String name;
+    private String accountId;
 
-    private String accessor;
+    private String token;
 
-    private Boolean claimed;
-
-
-
-
-
-    public String getName() {
-        return name;
+    public AliasDTO(Alias source, Principal principal) {
+        super(source, principal);
+        if (ps.getResource().meets(Permission.UserView)) {
+            accountId = source.getAccount().getId();
+        }
+        if (ps.getResource().meets(Permission.ExclusiveView)) {
+            token = source.getToken();
+        }
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getAccountId() {
+        return accountId;
     }
 
-    public String getAccessor() {
-        return accessor;
-    }
-
-    public void setAccessor(String accessor) {
-        this.accessor = accessor;
-    }
-
-    public Boolean getClaimed() {
-        return claimed;
-    }
-
-    public void setClaimed(Boolean claimed) {
-        this.claimed = claimed;
-    }
-
-    @Override
-    public AliasDTO prune(TrustLevel principalClearance) {
-        if (!principalClearance.meets(accessRequirements.get("get-name"))) name = null;
-        if (!principalClearance.meets(accessRequirements.get("get-accessor"))) accessor = null;
-        if (!principalClearance.meets(accessRequirements.get("get-claimed"))) claimed = null;
-        super.prune(principalClearance);
-        return this;
+    public String getToken() {
+        return token;
     }
 }

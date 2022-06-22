@@ -1,46 +1,45 @@
 package fh.server.rest.dto;
 
-import fh.server.constant.ComponentType;
 
-import java.util.HashMap;
-import java.util.Map;
+import fh.server.constant.Permission;
+import fh.server.constant.Visibility;
+import fh.server.context.Principal;
+import fh.server.entity.Poll;
+import lombok.Getter;
+import lombok.Setter;
 
-public class PollDTO extends WidgetComponentDTO {
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Getter
+@Setter
+public class PollDTO extends ComponentDTO {
 
     private String formulation;
-    private Map<String, String> submissions;
+    private Set<SubmissionDTO> submissions;
+    private Visibility submissionVisibility;
 
-    private Map<String, Integer> quantification;
+    public PollDTO(Poll source, Principal principal) {
+        super(source, principal);
 
-
-
+        if (ps.getResource().meets(Permission.UserView)) {
+            formulation = source.getFormulation();
+            submissionVisibility = source.getSubmissionVisibility();
+            if (submissionVisibility != Visibility.Invisible || ps.getResource().meets(Permission.AdminView)) {
+                submissions = source.getSubmissions().stream().map(c -> new SubmissionDTO(c, ps)).collect(Collectors.toSet());
+            }
+        }
+    }
 
     public String getFormulation() {
         return formulation;
     }
 
-    public void setFormulation(String formulation) {
-        this.formulation = formulation;
-    }
-
-    public Map<String, String> getSubmissions() {
+    public Set<SubmissionDTO> getSubmissions() {
         return submissions;
     }
 
-    public void setSubmissions(Map<String, String> submissions) {
-        this.submissions = submissions;
-    }
-
-    public Map<String, Integer> getQuantification() {
-        return quantification;
-    }
-
-    public void setQuantification(Map<String, Integer> quantification) {
-        this.quantification = quantification;
-    }
-
-    @Override
-    public ComponentType getComponentType() {
-        return ComponentType.Poll;
+    public Visibility getSubmissionVisibility() {
+        return submissionVisibility;
     }
 }

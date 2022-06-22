@@ -1,12 +1,14 @@
 package fh.server.service;
 
-import fh.server.entity.*;
-import fh.server.entity.widget.Poll;
-import fh.server.helpers.Context;
-import fh.server.helpers.Operation;
+import fh.server.constant.Permission;
+import fh.server.context.Principal;
+import fh.server.entity.Account;
+import fh.server.entity.Component;
+import fh.server.entity.Resource;
+import fh.server.entity.Scope;
 import fh.server.repository.*;
-import fh.server.rest.dao.EntityDAO;
-import fh.server.rest.dao.WidgetComponentDAO;
+import fh.server.rest.dao.ComponentDAO;
+import fh.server.rest.dao.ResourceDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,89 +17,75 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class ComponentService extends EntityService {
+public class ComponentService extends ResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComponentService.class);
 
 
 
-    protected final PollRepository pollRepository;
-    protected final AliasService aliasService;
+    protected final ComponentRepository componentRepository;
 
     public ComponentService(
             @Qualifier("entityRepository") EntityRepository entityRepository,
-            @Qualifier("pollRepository") PollRepository pollRepository,
-            @Qualifier("aliasService") AliasService aliasService
-
+            @Qualifier("resourceRepository") ResourceRepository resourceRepository,
+            @Qualifier("dataRepository") DataRepository dataRepository,
+            @Qualifier("componentRepository") ComponentRepository componentRepository
     ) {
-        super(entityRepository);
-        this.pollRepository = pollRepository;
-        this.aliasService = aliasService;
+        super(entityRepository, resourceRepository, dataRepository);
+        this.componentRepository = componentRepository;
+    }
+
+    public Component fetchComponent(String path) {
+        return componentRepository.findByPath(path)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "component not found: "+path));
+    }
+
+
+    @Override
+    public Resource create(ResourceDAO dao, Principal principal, Permission permissionRequired, Resource template) {
+        Scope parent = dao.getScope();
+        if (parent != null) {
+            try {
+                String position = ((ComponentDAO) dao).getPosition();
+                if (position == null || position.isEmpty()) position = "default_0";
+                String[] split = position.split("_");
+                String prefix = split[0] + "_";
+                int suffix = Integer.parseInt(split[1]);
+                for (Component c : parent.getComponents()) {
+                    String p = c.getPosition();
+                    if (p.startsWith(prefix)) {
+                        int s2 = Integer.parseInt(p.split("_")[1]);
+                        if (s2 >= suffix) suffix = s2 + 1;
+                    }
+                }
+                ((ComponentDAO) dao).setPosition(prefix + suffix);
+            } catch (Exception e) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "position syntax error");
+            }
+        } else ((ComponentDAO) dao).setPosition("default_0");
+        return super.create(dao, principal, permissionRequired, template);
+    }
+
+    public Component update(Component victim, ComponentDAO dao, Principal principal) {
+        victim = (Component) super.update(victim, dao, principal);
+        flush();
+        return victim;
     }
 
 
 
-    public Poll fetchById(String id) {
-        return pollRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "poll not found"));
+    protected Component saveAndFlush(Component created) {
+        super.saveAndFlush(created);
+        return componentRepository.saveAndFlush(created);
     }
 
-    public Poll operate(Poll poll, WidgetComponentDAO dao, Entity principal) {
-        super.operate(dao, new Context(principal, poll), this);
-        return poll;
-    }
-
-    protected Operation setup(String opKey, EntityDAO dao, Context context) {
-        WidgetComponentDAO componentDAO = (WidgetComponentDAO) dao;
-
-        if ("formulation".equals(opKey)) {
-            checkNotEmpty(componentDAO.getFormulation(), "formulation");
-            return context.operation(opKey, componentDAO.getFormulation(), context.victimAsPoll().getFormulation());
-        }
-
-        if (opKey.startsWith("Poll.q:")) {
-            String key = opKey.substring( "Poll.q:".length());
-            return context.operation(opKey, componentDAO.getQuantification().get(key), context.victimAsPoll().getQuantification(key));
-        }
-        return super.setup(opKey, dao, context);
-    }
-
-    protected void execute(Operation operation, EntityDAO dao) {
-        WidgetComponentDAO componentDAO = (WidgetComponentDAO) dao;
-        String opKey = operation.getOperation();
-
-        if ("formulation".equals(opKey)) {
-            checkNotEmpty(componentDAO.getFormulation(), "formulation");
-            operation.victimAsPoll().setFormulation(componentDAO.getFormulation()); return;
-        }
-        if (opKey.startsWith("Poll.q:")) {
-            String key = opKey.substring( "Poll.q:".length());
-            operation.victimAsPoll().putQuantification(key, operation.valueAsInteger());
-            return;
-        }
-        super.execute(operation, dao);
-    }
-
-    public Poll putSubmission(Poll poll, String submission, Alias alias) {
-        Operation operation = new Context(alias, poll).operation("submit", submission, poll.getSubmission(alias));
-        verifyOperation(operation);
-        poll.submit(operation.principalAsAlias(), operation.getValue());
-        pollRepository.flush();
-        LOGGER.info(operation.toString());
-        return poll;
-    }
-
-    public Poll revokeSubmission(Poll poll, Alias alias) {
-        Operation operation = new Context(alias, poll).operation("revoke-submission", null, poll.getSubmission(alias));
-        verifyOperation(operation);
-        poll.revokeSubmission(operation.principalAsAlias());
-        pollRepository.flush();
-        LOGGER.info(operation.toString());
-        return poll;
+    protected void flush() {
+        super.flush();
+        componentRepository.flush();
     }
 
     protected String typeLabel() {
-        return "poll";
+        return "component";
     }
 
 }

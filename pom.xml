@@ -8,12 +8,12 @@
         <version>2.5.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
+    <groupId>ch.bookoflies</groupId>
     <artifactId>server</artifactId>
     <version>2.5.1</version>
     <packaging>war</packaging>
     <name>server</name>
-    <description>Pizza delivery api</description>
+    <description>Lorify API</description>
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -30,13 +30,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <site>runtime</site>
+            <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <site>test</site>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -59,9 +59,15 @@
             <version>1.11</version>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <site>runtime</site>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.29</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>10.2.1.jre8</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -72,6 +78,12 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
             <version>5.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

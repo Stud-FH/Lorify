@@ -9,6 +9,7 @@ public class Tokens {
     private static final String digits = "0123456789";
 
     private static final char[] defaultCharPool = (alphabet.toLowerCase() + alphabet.toUpperCase() + digits).toCharArray();
+    private static final char[] uppercaseCharPool = (alphabet.toUpperCase() + digits).toCharArray();
 
     public static String random(int length, char... charPool) {
         if (length < 1) throw new IllegalArgumentException("token length required");
@@ -22,10 +23,18 @@ public class Tokens {
     }
 
     public static String randomAliasToken() {
-        return 'a' + random(3)+"-"+random(4);
+        return "a-" + UUID.randomUUID();
+    }
+
+    public static String shortAliasToken() {
+        return "a-" + random(4)+"-"+random(4);
     }
 
     public static String randomAccountToken() {
-        return 'A' + UUID.randomUUID().toString().substring(1);
+        return "A-" + UUID.randomUUID();
+    }
+
+    public static String randomLicenceCode() {
+        return random(4, uppercaseCharPool)+"-"+random(4, uppercaseCharPool)+"-"+random(4, uppercaseCharPool)+"-"+random(4, uppercaseCharPool);
     }
 }

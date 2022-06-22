@@ -2,99 +2,73 @@ package fh.server.controller;
 
 import fh.server.entity.Account;
 import fh.server.entity.Alias;
-import fh.server.entity.Entity;
-import fh.server.entity.Site;
+import fh.server.entity.Scope;
 import fh.server.rest.dao.AliasDAO;
 import fh.server.rest.dto.AliasDTO;
-import fh.server.rest.mapper.DTOMapper;
-import fh.server.rest.mapper.PruningMapper;
-import fh.server.service.AccountService;
 import fh.server.service.AliasService;
 import fh.server.service.AuthenticationService;
-import fh.server.service.SiteService;
+import fh.server.service.ScopeService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AliasController {
 
-    private final SiteService siteService;
+    private final ScopeService scopeService;
     private final AliasService aliasService;
     private final AuthenticationService authenticationService;
 
-    AliasController(
-            SiteService siteService,
-            AliasService aliasService,
-            AuthenticationService authenticationService
-    ) {
-        this.siteService = siteService;
+    public AliasController(ScopeService scopeService, AliasService aliasService, AuthenticationService authenticationService) {
+        this.scopeService = scopeService;
         this.aliasService = aliasService;
         this.authenticationService = authenticationService;
     }
 
 
 
-
-    @GetMapping("/alias/{siteName}")
+    @PostMapping("/mount/{path}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AliasDTO get(
+    public AliasDTO mount(
             @RequestHeader("Authorization") String token,
-            @PathVariable("siteName") String siteName,
-            @RequestBody AliasDAO data
+            @PathVariable("path") String path
     ) {
-        Site site = siteService.fetchSiteByName(siteName);
-        Entity principal = authenticationService.principal(site, token);
-        Alias alias = aliasService.fetchByName(site, data.getName());
-        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(alias, principal));
+        Scope parent = scopeService.fetchScope(path);
+        Account principal = authenticationService.principalAsAccount(token);
+
+        Alias created = aliasService.mount(parent, principal);
+        return new AliasDTO(created, principal);
     }
 
 
-    @PostMapping("/create-alias/{siteName}")
+    @PostMapping("/create-alias/{path}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public AliasDTO create(
             @RequestHeader("Authorization") String token,
-            @PathVariable("siteName") String siteName,
-            @RequestBody AliasDAO data
+            @PathVariable("path") String path,
+            @RequestBody AliasDAO dao
     ) {
-        Site site = siteService.fetchSiteByName(siteName);
-        Account principal = authenticationService.principalAsAccount(token);
-
-        Alias created = aliasService.create(site, data, principal);
-        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(created, principal));
+        Scope parent = scopeService.fetchScope(path);
+        Account principal = authenticationService.account(token);
+        Alias created = aliasService.create(parent, dao, principal);
+        return new AliasDTO(created, principal);
     }
 
-
-    @PostMapping("/claim-alias/{siteName}")
+    @PostMapping("/claim-alias/{path}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public AliasDTO claim(
             @RequestHeader("Authorization") String token,
-            @PathVariable("siteName") String siteName,
-            @RequestBody String data
+            @PathVariable("path") String path,
+            @RequestBody AliasDAO dao
     ) {
-        Site site = siteService.fetchSiteByName(siteName);
+        Scope parent = scopeService.fetchScope(path);
         Account principal = authenticationService.principalAsAccount(token);
 
-        Alias claimed = aliasService.claim(site, data, principal);
-        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(claimed, principal));
-    }
-
-
-    @PutMapping("/modify-alias/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public AliasDTO update(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") String id,
-            @RequestBody AliasDAO data
-    ) {
-        Alias alias = aliasService.fetchById(id);
-        Account principal = authenticationService.principalAsAccount(token);
-
-        Alias updated = aliasService.operate(alias, data, principal);
-        return DTOMapper.INSTANCE.map(PruningMapper.INSTANCE.prune(updated, principal));
+        Alias claimed = aliasService.claim(parent, dao, principal);
+        return new AliasDTO(claimed, principal);
     }
 
 
