@@ -1,13 +1,9 @@
 package fh.server.controller;
 
-import fh.server.context.Principal;
 import fh.server.entity.Account;
 import fh.server.entity.Licence;
-import fh.server.entity.Resource;
 import fh.server.rest.dao.LicenceDAO;
-import fh.server.rest.dao.ScopeDAO;
 import fh.server.rest.dto.LicenceDTO;
-import fh.server.rest.dto.ResourceDTO;
 import fh.server.service.AuthenticationService;
 import fh.server.service.LicenceService;
 import org.springframework.http.HttpStatus;
