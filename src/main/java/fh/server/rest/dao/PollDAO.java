@@ -3,11 +3,7 @@ package fh.server.rest.dao;
 import fh.server.constant.Visibility;
 import fh.server.entity.Alias;
 import fh.server.entity.Submission;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class PollDAO extends ComponentDAO {
 
     private String formulation;

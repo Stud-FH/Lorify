@@ -3,15 +3,11 @@ package fh.server.rest.dao;
 import fh.server.entity.Alias;
 import fh.server.entity.Component;
 import fh.server.entity.access.AccessRule;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Getter
-@Setter
 public class ScopeDAO extends ComponentDAO {
 
     private Map<String, Alias> aliases;

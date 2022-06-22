@@ -5,14 +5,10 @@ import fh.server.constant.Permission;
 import fh.server.context.PermissionSetting;
 import fh.server.context.Principal;
 import fh.server.entity.Resource;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Map;
 import java.util.Set;
 
-@Getter
-@Setter
 public class ResourceDTO extends EntityDTO {
 
     private String name;

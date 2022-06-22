@@ -5,14 +5,10 @@ import fh.server.constant.Permission;
 import fh.server.constant.Visibility;
 import fh.server.context.Principal;
 import fh.server.entity.Poll;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class PollDTO extends ComponentDTO {
 
     private String formulation;

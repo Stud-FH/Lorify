@@ -2,7 +2,6 @@ package fh.server.entity;
 
 import fh.server.constant.DataType;
 import fh.server.constant.EntityType;
-import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-@Getter
 @javax.persistence.Entity
 public class Data extends Entity {
 

@@ -3,11 +3,7 @@ package fh.server.rest.dto;
 import fh.server.constant.Permission;
 import fh.server.context.PermissionSetting;
 import fh.server.entity.Submission;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class SubmissionDTO extends EntityDTO {
 
     private String aliasId;

@@ -5,11 +5,9 @@ import fh.server.context.PermissionSetting;
 import fh.server.context.Principal;
 import fh.server.rest.dao.ComponentDAO;
 import fh.server.rest.dao.ResourceDAO;
-import lombok.Getter;
 
 import javax.persistence.*;
 
-@Getter
 @javax.persistence.Entity
 public abstract class Component extends Resource {
 

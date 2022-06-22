@@ -1,11 +1,7 @@
 package fh.server.rest.dao;
 
 import fh.server.entity.Account;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class AliasDAO extends ResourceDAO {
 
     String accountId;

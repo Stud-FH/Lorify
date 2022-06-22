@@ -6,13 +6,10 @@ import fh.server.context.PermissionSetting;
 import fh.server.context.Principal;
 import fh.server.rest.dao.ContentDAO;
 import fh.server.rest.dao.ResourceDAO;
-import fh.server.rest.dao.ScopeDAO;
-import lombok.Getter;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-@Getter
 @javax.persistence.Entity
 public class Content extends Component {
 

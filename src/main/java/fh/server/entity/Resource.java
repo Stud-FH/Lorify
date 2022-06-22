@@ -8,12 +8,10 @@ import fh.server.context.Principal;
 import fh.server.helpers.Paths;
 import fh.server.rest.dao.ResourceDAO;
 import fh.server.service.EntityService;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.*;
 
-@Getter
 @javax.persistence.Entity
 public class Resource extends Entity {
 

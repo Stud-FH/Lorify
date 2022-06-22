@@ -9,7 +9,6 @@ import fh.server.rest.dto.PollDTO;
 import fh.server.service.AuthenticationService;
 import fh.server.service.PollService;
 import fh.server.service.ScopeService;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

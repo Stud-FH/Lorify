@@ -1,13 +1,11 @@
 package fh.server.entity;
 
 import fh.server.constant.EntityType;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
-@Getter
 @javax.persistence.Entity
 @Table(name = "entity", schema = "dbo")
 @Inheritance(strategy=InheritanceType.JOINED)

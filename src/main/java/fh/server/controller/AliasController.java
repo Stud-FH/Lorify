@@ -8,7 +8,6 @@ import fh.server.rest.dto.AliasDTO;
 import fh.server.service.AliasService;
 import fh.server.service.AuthenticationService;
 import fh.server.service.ScopeService;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

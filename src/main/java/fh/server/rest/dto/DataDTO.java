@@ -3,11 +3,7 @@ package fh.server.rest.dto;
 
 import fh.server.constant.DataType;
 import fh.server.entity.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class DataDTO extends EntityDTO {
 
     private Integer length;

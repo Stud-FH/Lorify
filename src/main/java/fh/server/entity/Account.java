@@ -4,12 +4,10 @@ import fh.server.constant.EntityType;
 import fh.server.context.Principal;
 import fh.server.entity.login.Login;
 import fh.server.helpers.Tokens;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.*;
 
-@Getter
 @javax.persistence.Entity
 public class Account extends Entity implements Principal {
 

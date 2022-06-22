@@ -1,11 +1,7 @@
 package fh.server.rest.dto;
 
 import fh.server.entity.Entity;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class EntityDTO {
 
     private String id;

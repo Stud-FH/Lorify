@@ -7,12 +7,10 @@ import fh.server.context.Principal;
 import fh.server.entity.access.AccessRule;
 import fh.server.rest.dao.ResourceDAO;
 import fh.server.rest.dao.ScopeDAO;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.*;
 
-@Getter
 @javax.persistence.Entity
 public class Scope extends Component {
 

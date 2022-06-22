@@ -1,11 +1,7 @@
 package fh.server.rest.dao;
 
 import fh.server.constant.EntityType;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class EntityDAO {
 
     private EntityType type;

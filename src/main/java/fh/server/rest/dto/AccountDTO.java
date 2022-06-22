@@ -2,14 +2,10 @@ package fh.server.rest.dto;
 
 import fh.server.context.Principal;
 import fh.server.entity.Account;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class AccountDTO extends EntityDTO {
 
 

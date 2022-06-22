@@ -1,13 +1,11 @@
 package fh.server.entity;
 
 import fh.server.constant.EntityType;
-import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@Getter
 @javax.persistence.Entity
 public class Submission extends Entity {
 

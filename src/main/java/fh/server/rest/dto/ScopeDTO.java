@@ -4,14 +4,10 @@ package fh.server.rest.dto;
 import fh.server.constant.Permission;
 import fh.server.context.Principal;
 import fh.server.entity.Scope;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class ScopeDTO extends ComponentDTO {
 
     private Set<AliasDTO> aliases;

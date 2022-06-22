@@ -2,7 +2,6 @@ package fh.server.entity;
 
 import fh.server.constant.EntityType;
 import fh.server.helpers.Tokens;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -11,7 +10,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
 @javax.persistence.Entity
 public class Licence extends Entity {
 

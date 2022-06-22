@@ -2,12 +2,10 @@ package fh.server.entity;
 
 import fh.server.constant.EntityType;
 import fh.server.context.Principal;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.Set;
 
-@Getter
 @javax.persistence.Entity
 public class Alias extends Resource implements Principal {
 

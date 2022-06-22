@@ -1,13 +1,9 @@
 package fh.server.rest.dto;
 
 import fh.server.entity.Licence;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Set;
 
-@Getter
-@Setter
 public class LicenceDTO extends EntityDTO {
 
     private String ownerId;

@@ -7,13 +7,11 @@ import fh.server.context.PermissionSetting;
 import fh.server.context.Principal;
 import fh.server.rest.dao.PollDAO;
 import fh.server.rest.dao.ResourceDAO;
-import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.Optional;
 import java.util.Set;
 
-@Getter
 @javax.persistence.Entity
 public class Poll extends Component {
 

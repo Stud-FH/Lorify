@@ -1,10 +1,7 @@
 package fh.server.context;
 
 import fh.server.constant.Permission;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
 public class PermissionSetting {
 
     private final Principal principal;

@@ -3,11 +3,7 @@ package fh.server.rest.dto;
 import fh.server.constant.Permission;
 import fh.server.context.Principal;
 import fh.server.entity.Alias;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class AliasDTO extends ResourceDTO {
 
     private String accountId;

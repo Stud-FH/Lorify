@@ -6,12 +6,10 @@ import fh.server.constant.Permission;
 import fh.server.context.Principal;
 import fh.server.entity.Entity;
 import fh.server.entity.Scope;
-import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.Enumerated;
 
-@Getter
 @javax.persistence.Entity
 public class AccessRule extends Entity {
 

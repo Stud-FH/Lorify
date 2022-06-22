@@ -3,14 +3,10 @@ package fh.server.rest.dao;
 
 import fh.server.entity.Account;
 import fh.server.entity.Scope;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Map;
 import java.util.Set;
 
-@Getter
-@Setter
 public class ResourceDAO extends EntityDAO {
 
 

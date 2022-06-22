@@ -3,11 +3,7 @@ package fh.server.rest.dto;
 import fh.server.constant.AccessRuleType;
 import fh.server.constant.Permission;
 import fh.server.entity.access.AccessRule;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class AccessRuleDTO extends EntityDTO {
 
     private Permission permission;

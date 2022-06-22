@@ -1,11 +1,7 @@
 package fh.server.rest.dto;
 
 import fh.server.entity.login.Login;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class LoginDTO extends EntityDTO {
 
     private String ownerId;

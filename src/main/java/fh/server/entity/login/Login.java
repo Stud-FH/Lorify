@@ -2,11 +2,9 @@ package fh.server.entity.login;
 
 import fh.server.constant.LoginMethod;
 import fh.server.entity.Account;
-import lombok.Getter;
 
 import javax.persistence.*;
 
-@Getter
 @javax.persistence.Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 public abstract class Login extends fh.server.entity.Entity {
